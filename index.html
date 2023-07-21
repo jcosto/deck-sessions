@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Vue Mastery</title>
+        <!-- Import Vue.js -->
+        <link rel="stylesheet" href="./assets/styles.css" />
+        <script src="https://unpkg.com/vue@3.0.11/dist/vue.global.js"></script>
+    </head>
+    <body>
+        <div id="app">
+            <div>
+                <button @click="createSession">Create Session</button>
+            </div>
+
+            <div v-for="sessionID in sessions" :key="sessionID">
+                <h1>Session {{sessionID}}</h1>
+                <card-table :sessionid="sessionID"
+                    @deck-initialized="deckInitialized"
+                    @deck-shuffled="deckShuffled"
+                    @card-shown-changed="cardShownChanged"
+                    @card-moved="cardMoved"
+                    >
+                </card-table>
+            </div>
+        </div>
+
+        <!-- Import App -->
+        <script src="./main.js"></script>
+        <script src="./components/deck.js"></script>
+        <script src="./components/card.js"></script>
+
+        <!-- Mount App -->
+        <script>
+        const mountedApp = app.mount('#app')
+        </script>
+    </body>
+</html>
