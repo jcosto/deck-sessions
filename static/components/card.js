@@ -5,13 +5,14 @@ function flipCard(e) {
 app.component('card-card', {
     props: {
         card: {},
-        cardlocation: {}
+        cardlocation: {},
+        cardshown: {}
     },
     template: 
     `
     <div class="card-container-container">
         <div class="card-container" @click="toggleCardShown">
-            <div class="card" :class="{ flipped: card.shown }" >
+            <div class="card" :class="{ flipped: cardshown }" >
                 <div class="front"></div>
                 <div class="back">{{card.value+card.suit}}</div>
             </div>
@@ -31,5 +32,5 @@ app.component('card-card', {
         dealToHand() {
             this.$emit('move-card', this.card, this.cardlocation, "hand")
         }
-    }
+    },
 })

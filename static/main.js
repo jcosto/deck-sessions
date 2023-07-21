@@ -6,38 +6,57 @@ socket.on('connect', function() {
 const app = Vue.createApp({
     data() {
         return {
-            sessions: []
+            joinSessionID: null,
+            sessions: [],
+            userID: null
         }
     },
     methods: {
         createSession() {
-            this.sessions.push('session'+Math.floor(32767 * Math.random()))
+            const sessionID = 'session'+Math.floor(2000000 * Math.random())
+            this.joinSession(sessionID)
+        },
+        joinSession(sessionID) {
+            if (!this.userID) {
+                this.userID = 'user'+Math.floor(2000000 * Math.random())
+            }
+
+            this.sessions.push(sessionID)
+            
+            socket.emit('join', {sessionID: sessionID, userID: this.userID})
         },
         deckInitialized(sessionID) {
             console.log('deck initialized for ' + sessionID)
-            socket.emit('deck-initialized', {sessionID: sessionID});
+            socket.emit('deck-initialized', {
+                sessionID: sessionID,
+                userID: this.userID
+            });
         },
         deckShuffled(sessionID, deck) {
             console.log('deck shuffled for ' + sessionID)
             console.log(deck)
             socket.emit('deck-shuffled', {
                 sessionID: sessionID,
-                deck: deck
+                deck: deck,
+                userID: this.userID
             });
         },
         cardShownChanged(sessionID, card){
             console.log('card-shown-changed', card)
             socket.emit('card-shown-changed', {
                 sessionID: sessionID,
-                card: card
+                card: card,
+                userID: this.userID
             });
         },
-        cardMoved(sessionID, card, destination){
-            console.log("card-moved", card, destination)
+        cardMoved(sessionID, card, source, destination){
+            console.log("card-moved", card,source, destination)
             socket.emit('card-moved', {
                 sessionID: sessionID,
                 card: card,
-                destination: destination
+                source: source,
+                destination: destination,
+                userID: this.userID
             });
         }
     }

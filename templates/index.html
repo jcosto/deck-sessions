@@ -24,13 +24,21 @@
     </head>
     <body>
         <div id="app">
-            <div>
-                <button @click="createSession">Create Session</button>
+            <div v-if="sessions.length === 0">
+                <div>
+                    <button @click="createSession">Create Session</button>
+                </div>
+                <div>OR</div>
+                <div>
+                    <input type="text" id="sessionID" v-model="joinSessionID" placeholder="SessionID">
+                    <button @click="joinSession(joinSessionID)">Join Session</button>
+                </div>
             </div>
 
-            <div v-for="sessionID in sessions" :key="sessionID">
-                <h1>Session {{sessionID}}</h1>
+            <div v-else v-for="sessionID in sessions" :key="sessionID">
                 <card-table :sessionid="sessionID"
+                    :joined="!!joinSessionID"
+                    :userid="userID"
                     @deck-initialized="deckInitialized"
                     @deck-shuffled="deckShuffled"
                     @card-shown-changed="cardShownChanged"
