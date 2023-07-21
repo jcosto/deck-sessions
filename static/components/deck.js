@@ -80,28 +80,28 @@ app.component('card-table', {
         dealCard() {
             const card = this.deck.pop()
             this.hand.push(card)
-            this.$emit("card-moved", card, "hand")
+            this.$emit("card-moved", this.sessionid, card, "hand")
         },
         dealCardToTable() {
             const card = this.deck.pop()
             this.table.push(card)
-            this.$emit("card-moved", card, "table")
+            this.$emit("card-moved", this.sessionid, card, "table")
         },
         dealHandToTable(cardIndex) {
             const card = this.hand[cardIndex]
             this.table.push(card)
             this.hand = this.hand.filter((c,i) => i !== cardIndex)
-            this.$emit("card-moved", card, "table")
+            this.$emit("card-moved", this.sessionid, card, "table")
         },
         dealTableToHand(cardIndex) {
             const card = this.table[cardIndex]
             card.shown = false
             this.hand.push(card)
             this.table = this.table.filter((c,i) => i !== cardIndex)
-            this.$emit("card-moved", card, "hand")
+            this.$emit("card-moved", this.sessionid, card, "hand")
         },
         cardShownChanged(card){
-            this.$emit('card-shown-changed', card)
+            this.$emit('card-shown-changed', this.sessionid, card)
         },
         moveCard(card, source, destination){
             console.log("moveCard", card, source, destination)
