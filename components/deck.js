@@ -10,32 +10,34 @@ app.component('card-table', {
     <div class="card-session">
         <button v-if="!sessionStarted" @click="startSession">Start session {{sessionid}}</button>
         <div v-else>
+            <h1>Deck</h1>
             <div class="card-deck">
-                <h1>Deck</h1>
                 <button @click="dealCard">Deal Card to Hand</button>
                 <button @click="dealCardToTable">Deal Card to Table</button>
             </div>
             
+            <h1>Hand</h1>
             <div class="card-hand">
-                <h1>Hand</h1>
-                <div v-for="(card, cardIndex) in hand" :key="card.id">    
-                    <card-card
-                        :card="card"
-                        @card-shown-changed="cardShownChanged"
-                    ></card-card>
-                    <button @click="dealHandToTable(cardIndex)">Set on table</button>
-                </div>
+                <card-card
+                    v-for="(card, cardIndex) in hand"
+                    :key="card.id"
+                    :card="card"
+                    :cardlocation="'hand'"
+                    @card-shown-changed="cardShownChanged"
+                    @move-card="moveCard"
+                ></card-card>
             </div>
 
+            <h1>Table</h1>
             <div class="card-table">
-                <h1>Table</h1>
-                <div v-for="(card, cardIndex) in table" :key="card.id">
-                    <card-card
-                        :card="card"
-                        @card-shown-changed="cardShownChanged"
-                    ></card-card>
-                    <button @click="dealTableToHand(cardIndex)">Pick up card</button>
-                </div>
+                <card-card
+                    v-for="(card, cardIndex) in table"
+                    :key="card.id"
+                    :card="card"
+                    :cardlocation="'table'"
+                    @card-shown-changed="cardShownChanged"
+                    @move-card="moveCard"
+                ></card-card>
             </div>
         </div>
     </div>
@@ -100,6 +102,16 @@ app.component('card-table', {
         },
         cardShownChanged(card){
             this.$emit('card-shown-changed', card)
+        },
+        moveCard(card, source, destination){
+            console.log("moveCard", card, source, destination)
+            if (source === "hand" && destination === "table") {
+                this.dealHandToTable(this.hand.map((c, i) => c.id === card.id ? i : null).filter(i => i !== null)[0])
+            } else if (source === "table" && destination === "hand") {
+                this.dealTableToHand(this.table.map((c, i) => c.id === card.id ? i : null).filter(i => i !== null)[0])
+            } else {
+                console.log("invalid move", card, source, destination)
+            }
         }
     },
     computed: {
