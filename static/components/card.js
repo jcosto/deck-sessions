@@ -18,7 +18,6 @@ app.component('card-card', {
             </div>
         </div>
         <button @click="dealToTable" v-if="cardlocation!=='table'">Set on table</button>
-        <button @click="dealToHand" v-if="cardlocation!=='hand'">Pick up card</button>
     </div>
     `,
     methods: {

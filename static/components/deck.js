@@ -25,21 +25,7 @@ app.component('card-table', {
             <div class="card-deck">
                 <button @click="initializeDeck">initializeDeck</button>
                 <button @click="shuffleDeck">shuffleDeck</button>
-                <button @click="dealCard">Deal Card to Hand</button>
                 <button @click="dealCardToTable">Deal Card to Table</button>
-            </div>
-            
-            <h1>Hand</h1>
-            <div class="card-hand">
-                <card-card
-                    v-for="(card, cardIndex) in hand"
-                    :key="card.id"
-                    :card="card"
-                    :cardlocation="'hand'"
-                    :cardshown="card.shown"
-                    @card-shown-changed="cardShownChanged"
-                    @move-card="moveCard"
-                ></card-card>
             </div>
 
             <h1>Table</h1>
@@ -61,10 +47,7 @@ app.component('card-table', {
         return {
             values: ['A',2,3,4,5,6,7,8,9,10,'J','Q','K'],
             suits: ["C","S","H","D"],
-            cards: {},
-            deck: [],
-            hand: [],
-            table: [],
+            cards_: {},
             sessionStarted: false
         }
     },
@@ -92,14 +75,14 @@ app.component('card-table', {
                 if (data.userID!==this.userid) {
                     console.log("received server-deck-shuffled event from other user")
                     this.deck = data.deck.map(c => {
-                        return this.cards[c.id]
+                        return this.cards_[c.id]
                     })
                 }
             })
             socket.on('server-card-shown-changed', (data) => {
                 if (data.userID!==this.userid) {
                     console.log("received server-card-shown-changed event from other user")
-                    this.cards[data.card.id].shown = data.card.shown
+                    this.cards_[data.card.id].shown = data.card.shown
                 }
             })
             socket.on('server-card-moved', (data) => {
@@ -110,7 +93,11 @@ app.component('card-table', {
             })
         },
         shuffleDeck() {
-            this.deck = shuffleArray(this.deck)
+            shuffleArray(this.deck).forEach(
+                (c,i) => {
+                    c.seq = i
+                }
+            )
             console.log(this.deck)
             this.$emit('deck-shuffled', this.sessionid, this.deck)
         },
@@ -123,22 +110,24 @@ app.component('card-table', {
                         id: ''+v+s,
                         suit: s,
                         value: v,
-                        shown: false
+                        shown: false,
+                        location: "deck",
+                        seq: deck.length
                     }
                     cards[c.id] = c
                     deck.push(cards[c.id])
                 }) 
             });
-            this.deck = deck
-            this.cards = cards
+            this.cards_ = cards
 
             console.log(this.deck)
-            console.log(this.cards)
+            console.log(this.cards_)
             
             sendEvent ? this.$emit('deck-initialized', this.sessionid) : null
+            return deck
         },
         transferCard(arr1, location1, arr2, location2, card_, hideCardAfterTransfer=true, sendEvent=true) {
-            const card = this.cards[card_.id]
+            const card = this.cards_[card_.id]
             card.shown = hideCardAfterTransfer ? false : card.shown
             const cardIndex = arr1.indexOf(card)
             if (cardIndex > -1) {
@@ -149,39 +138,12 @@ app.component('card-table', {
             
             sendEvent ? this.$emit("card-moved", this.sessionid, card, location1, location2) : null
         },
-        dealCard(sendEvent=true) {
-            this.transferCard(
-                this.deck, "deck",
-                this.hand, "hand",
-                this.deck[this.deck.length-1],
-                hideCardAfterTransfer=false,
-                sendEvent=sendEvent
-            )
-        },
         dealCardToTable(sendEvent=true) {
             this.transferCard(
                 this.deck, "deck",
                 this.table, "table",
                 this.deck[this.deck.length-1],
                 hideCardAfterTransfer=false,
-                sendEvent=sendEvent
-            )
-        },
-        dealHandToTable(cardIndex, sendEvent=true) {
-            this.transferCard(
-                this.hand, "hand",
-                this.table, "table",
-                this.hand[cardIndex],
-                hideCardAfterTransfer=false,
-                sendEvent=sendEvent
-            )
-        },
-        dealTableToHand(cardIndex, sendEvent=true) {
-            this.transferCard(
-                this.table, "table",
-                this.hand, "hand",
-                this.table[cardIndex],
-                hideCardAfterTransfer=true,
                 sendEvent=sendEvent
             )
         },
@@ -219,7 +181,41 @@ app.component('card-table', {
         }
     },
     computed: {
-
+        cards() {
+            if (this.cards_.length == 0) {
+                this.suits.forEach(s => {
+                    this.values.forEach(v => {
+                        const c = {
+                            id: ''+v+s,
+                            suit: s,
+                            value: v,
+                            shown: false,
+                            location: "deck",
+                            seq: deck.length
+                        }
+                        this.cards_[c.id] = c
+                    }) 
+                });
+            }
+            return this.cards_
+        },
+        deck() {
+            if (!!this.cards.values) {
+                const d = this.cards.values.filter(card => card.location == 'deck')
+                d.sort((a,b) => a.seq-b.seq)
+                return d
+            }
+            return []
+        },
+        table() {
+            
+            if (!!this.cards.values) {
+                const d = this.cards.values.filter(card => card.location == 'table')
+                d.sort((a,b) => a.seq-b.seq)
+                return d
+            }
+            return []
+        }
     }
   })
 
