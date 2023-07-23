@@ -11,26 +11,30 @@ app.component('card-table', {
         <div class="table">
             <div class="row">
                 <div class="col">
-                    <h1>Deck</h1>
-                    <card-card
-                        v-for="(card, cardIndex) in deck"
-                        :key="card.id"
-                        :card="card"
-                        :cardlocation="'deck'"
-                        :cardshown="card.shown"
-                        @move-card="move_card"
-                    ></card-card>
+                    <h1>Deck ({{deck.length}})</h1>
+                    <div v-if="deck.length > 0">
+                        <card-card
+                            v-for="(card, cardIndex) in [deck[deck.length-1]]"
+                            :key="card.id"
+                            :card="card"
+                            :cardlocation="'deck'"
+                            :cardshown="card.shown"
+                            @move-card="move_card"
+                        ></card-card>
+                    </div>
                 </div>
                 <div class="col">
-                    <h1>Table</h1>
-                    <card-card
-                        v-for="(card, cardIndex) in table"
-                        :key="card.id"
-                        :card="card"
-                        :cardlocation="'table'"
-                        :cardshown="card.shown"
-                        @move-card="move_card"
-                    ></card-card>
+                    <h1>Table ({{table.length}})</h1>
+                    <div v-if="table.length > 0">
+                        <card-card
+                            v-for="(card, cardIndex) in table"
+                            :key="card.id"
+                            :card="card"
+                            :cardlocation="'table'"
+                            :cardshown="card.shown"
+                            @move-card="move_card"
+                        ></card-card>
+                    </div>
                 </div>
             </div>
         </div>
