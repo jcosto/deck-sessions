@@ -24,85 +24,19 @@
     </head>
     <body>
         <div id="app">
-            {{sessionid_}}
+            <card-table
+                :sessionid = "sessionid_"
+                :deck="deck"
+                :table="table"
+                :cards="cards"
+                @move-card="move_card"
+            >
+            </card-table>
         </div>
 
-
-        <script>
-            const app = Vue.createApp({
-                data() {
-                    return {
-                        sessionid_: 'session'+Math.floor(2000000 * Math.random()),
-                        values: ['A',2,3,4,5,6,7,8,9,10,'J','Q','K'],
-                        suits: ["C","S","H","D"],
-                        cards_: {},
-                        stacks_: {}
-                    }
-                },
-                methods: {
-                    getStack(location) {
-                        const d = []
-                        for (let k in this.cards_){
-                            if (this.cards_[k].location === location) {
-                                d.push(this.cards_[k])
-                            }
-                        }
-                        d.sort((a,b) => a.seq-b.seq)
-                        return d
-                    },
-                    maxSeq(){
-                        return Math.max(Object.entries(this.cards_).map(kc=>kc[1].seq))
-                    },
-                    changeCardLocation(cardid, location_dst) {
-                        const location_src = this.cards_[cardid].location
-                        
-                        this.stacks_[location_dst] = Object.entries(this.cards_)
-                            .filter(kc=>kc[1].location==location_dst)
-                            .map(kc=>kc[1])
-                        this.stacks_[location_dst].push(this.cards_[cardid])
-                        this.cards_[cardid].location = location_dst
-                        this.cards_[cardid].seq = this.maxSeq()+1
-                        this.stacks_[location_dst].sort((a,b) => a.seq-b.seq)
-                        
-                        this.stacks_[location_src] = Object.entries(this.cards_)
-                            .filter(kc=>kc[1].location==location_src)
-                            .map(kc=>kc[1])
-                        this.stacks_[location_src].sort((a,b) => a.seq-b.seq)
-                    }
-                },
-                computed: {
-                    cards() {
-                        const cards_ = []
-                        let count = 0
-                        this.suits.forEach(s => {
-                            this.values.forEach(v => {
-                                const c = {
-                                    id: ''+v+s,
-                                    suit: s,
-                                    value: v,
-                                    shown: false,
-                                    location: "deck",
-                                    seq: count
-                                }
-                                count += 1
-                                cards_[c.id] = c
-                            }) 
-                        });
-                        this.cards_=cards_
-                        return cards_
-                    },
-                    deck() {
-                        return this.stacks_["deck"]
-                    },
-                    table() {
-                        return this.stacks_["table"]
-                    },
-                    hand() {
-                        return this.stacks_["hand"]
-                    }
-                }
-            })
-        </script>
+        <script src="{{url_for('static', filename='main2.js')}}"></script>
+        <script src="{{url_for('static', filename='components/deck2.js')}}"></script>
+        <script src="{{url_for('static', filename='components/card2.js')}}"></script>
         
 
         <!-- Mount App -->
