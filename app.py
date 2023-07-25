@@ -5,11 +5,11 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = token_hex(32)
 socketio = SocketIO(app)
 
-@app.route("/")
+@app.route("/"+token_hex(32))
 def home():
     return render_template('index.html')
 
-@app.route("/2")
+@app.route("/")
 def home2():
     return render_template('index2.html')
 
