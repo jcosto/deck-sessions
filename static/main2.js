@@ -1,7 +1,14 @@
+const socket = io();
+socket.on('connect', function() {
+    socket.emit('my event', {data: 'I\'m connected!'});
+});
+
+
 const app = Vue.createApp({
     data() {
         return {
             sessionid_: 'session'+Math.floor(2000000 * Math.random()),
+            userid_: 'user'+Math.floor(2000000 * Math.random()),
             values: ['A',2,3,4,5,6,7,8,9,10,'J','Q','K'],
             values_icons: [null,null,null,null,null,null,null,null,null,null,'chess-knight','chess-queen','crown'],
             suits: ["C","S","H","D"],
@@ -9,6 +16,9 @@ const app = Vue.createApp({
             cards_: {},
             stacks_: {}
         }
+    },
+    mounted() {
+        this.handleChangedJoinSessionID(this.sessionid_)
     },
     methods: {
         getStack(location) {
@@ -25,8 +35,16 @@ const app = Vue.createApp({
         move_card(card, source, destination, sendEvent=true){
             console.log("move_card", card, source, destination)
             this.changeCardLocation(card.id, destination)
+
+            sendEvent ? socket.emit('card-moved', {
+                sessionID: this.sessionid_,
+                card: card,
+                source: source,
+                destination: destination,
+                userID: this.userid_
+            }) : null
         },
-        changeCardLocation(cardid, location_dst) {
+        changeCardLocation(cardid, location_dst, sendEvent=true) {
             console.log("changeCardLocation", cardid, location_dst)
             const location_src = this.cards_[cardid].location
             
@@ -43,13 +61,80 @@ const app = Vue.createApp({
                 .map(kc=>kc[1])
             this.stacks_[location_src].sort((a,b) => a.seq-b.seq)
         },
-        shuffleDeck() {
+        shuffleDeck(sendEvent=true) {
             shuffleArray(this.stacks_["deck"]).forEach(
                 (c,i) => {
                     c.seq = i
                 }
             )
             console.log(this.stacks_["deck"])
+
+            sendEvent ? socket.emit('deck-shuffled', {
+                sessionID: this.sessionid_,
+                userID: this.userid_,
+                cards: this.cards_
+            }) : null
+        },
+        handeCardShownChanged(card) {
+            console.log('card-shown-changed', card)
+            socket.emit('card-shown-changed', {
+                sessionID: this.sessionid_,
+                card: card,
+                userID: this.userid_
+            });
+        },
+        getAllStacks() {
+            const locations = []
+            for (let k in this.cards_) {
+                if (!locations.includes(this.cards_[k].location)) {
+                    locations.push(this.cards_[k].location)
+                }
+            }
+            locations.forEach(location => {
+                this.getStack(location)
+            })
+        },
+        handleChangedJoinSessionID(joinSessionID) {
+            this.sessionid_ = joinSessionID
+            socket.emit('join', {sessionID: this.sessionid_, userID: this.userid_})
+            socket.on('server-deck-state', (data) => {
+                if (data.userID!==this.userid_) {
+                    console.log("received server-deck-state event from other user")
+                }
+            })
+            socket.on('server-deck-initialized', (data) => {
+                console.log(data)
+                if (data.userID!==this.userid_) {
+                    console.log("received server-deck-initialized event from other user")
+                    // reflect cards from socket to ui
+                    for (let cardid in data.cards) {
+                        this.cards_[cardid] = data.cards[cardid]
+                    }
+                    this.getAllStacks()
+                }
+            })
+            socket.on('server-deck-shuffled', (data) => {
+                if (data.userID!==this.userid_) {
+                    console.log("received server-deck-shuffled event from other user")
+                    // reflect cards from socket to ui
+                    for (let cardid in data.cards) {
+                        this.cards_[cardid] = data.cards[cardid]
+                    }
+                    this.getAllStacks()
+                }
+            })
+            socket.on('server-card-shown-changed', (data) => {
+                if (data.userID!==this.userid_) {
+                    console.log("received server-card-shown-changed event from other user")
+                    this.cards_[data.card.id].shown = data.card.shown
+                }
+            })
+            socket.on('server-card-moved', (data) => {
+                if (data.userID!==this.userid_) {
+                    console.log("received server-card-moved event from other user")
+                    this.move_card(data.card, data.source, data.destination, sendEvent=false)
+                }
+            })
         },
     },
     computed: {
@@ -75,6 +160,12 @@ const app = Vue.createApp({
                 });
                 this.cards_=cards_
                 this.getStack("deck")
+
+                socket.emit('deck-initialized', {
+                    sessionID: this.sessionid_,
+                    userID: this.userid_,
+                    cards: this.cards_
+                });
             }
             return this.cards_
         },

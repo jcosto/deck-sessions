@@ -25,6 +25,7 @@ def on_join(data):
     user = data["userID"]
     join_room(room)
     send(user + ' joined the room ' + room, to=room)
+    print(user + ' joined the room ' + room)
 
 @socketio.on('deck-initialized')
 def handle_deck_initialized(json):
