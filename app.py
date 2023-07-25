@@ -1,8 +1,8 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO
-
+from secrets import token_hex
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
+app.config['SECRET_KEY'] = token_hex(32)
 socketio = SocketIO(app)
 
 @app.route("/")
