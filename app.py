@@ -5,11 +5,11 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = token_hex(32)
 socketio = SocketIO(app)
 
-@app.route("/")
+@app.route("/"+token_hex(32))
 def home():
     return render_template('index.html')
 
-@app.route("/2")
+@app.route("/")
 def home2():
     return render_template('index2.html')
 
@@ -25,6 +25,7 @@ def on_join(data):
     user = data["userID"]
     join_room(room)
     send(user + ' joined the room ' + room, to=room)
+    print(user + ' joined the room ' + room)
 
 @socketio.on('deck-initialized')
 def handle_deck_initialized(json):

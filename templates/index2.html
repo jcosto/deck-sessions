@@ -33,6 +33,9 @@
                 :table="table"
                 :cards="cards"
                 @move-card="move_card"
+                @changed-session-id="handleChangedJoinSessionID"
+                @card-shown-changed="handeCardShownChanged"
+                @shuffle-deck="shuffleDeck"
             >
             </card-table>
         </div>
