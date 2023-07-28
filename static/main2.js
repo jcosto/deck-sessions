@@ -82,10 +82,14 @@ const app = Vue.createApp({
             )
             console.log(this.stacks_["deck"])
 
+            const cobj = {}
+            Object.entries(this.cards_).forEach((kc => {
+                cobj[kc[0]]=kc[1]
+            }))
             sendEvent ? socket.emit('deck-shuffled', {
                 sessionID: this.sessionid_,
                 userID: this.userid_,
-                cards: this.cards_
+                cards: cobj
             }) : null
         },
         handeCardShownChanged(card) {
@@ -130,6 +134,7 @@ const app = Vue.createApp({
                 if (data.userID!==this.userid_) {
                     console.log("received server-deck-shuffled event from other user")
                     // reflect cards from socket to ui
+                    console.log(data.cards)
                     for (let cardid in data.cards) {
                         this.cards_[cardid] = data.cards[cardid]
                     }
@@ -177,7 +182,7 @@ const app = Vue.createApp({
                 socket.emit('deck-initialized', {
                     sessionID: this.sessionid_,
                     userID: this.userid_,
-                    cards: this.cards_
+                    cards: cards_
                 });
             }
             return this.cards_
