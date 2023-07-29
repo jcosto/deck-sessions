@@ -40,13 +40,15 @@
         </div>
 
         <script src="{{url_for('static', filename='main_pubsub.js')}}"></script>
-        <script src="{{url_for('static', filename='components/deck.js')}}"></script>
-        <script src="{{url_for('static', filename='components/card.js')}}"></script>
+        <script src="{{url_for('static', filename='components/deck_pubsub.js')}}"></script>
+        <script src="{{url_for('static', filename='components/card_pubsub.js')}}"></script>
         
 
         <!-- Mount App -->
         <script>
-        const mountedApp = app.mount('#app')
+            document.addEventListener('app-configured', () => {
+                const mountedApp = app.mount('#app')
+            })
         </script>
     </body>
 </html>
