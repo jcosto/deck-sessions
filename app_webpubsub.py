@@ -9,7 +9,7 @@ socketio = SocketIO(app)
 def home():
     return render_template('index-socketio.html')
 
-@socketio.on('loginevent')
+@socketio.on('my event')
 def handle_my_custom_event(json):
     print('received json: ' + str(json))
 
