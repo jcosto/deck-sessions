@@ -1,27 +1,17 @@
+const USERID = 'user'+Math.floor(2000000 * Math.random())
+
+
 const socket = io();
 socket.on('connect', function() {
-    socket.emit('loginevent', {data: 'I\'m connected!'});
+    socket.emit('loginevent', {data: 'I\'m connected!', userID: USERID});
 });
 
-async function pubsub() {
-    let messages = document.querySelector('#messages');
-    let res = await fetch(`${window.location.origin}/api/negotiate`);
-    let url = await res.json();
-    let ws = new WebSocket(url.url);
-    ws.onopen = () => console.log('connected');
-
-    ws.onmessage = event => {
-        let m = document.createElement('p');
-        m.innerText = event.data;
-        messages.appendChild(m);
-    };
-}();
 
 const app = Vue.createApp({
     data() {
         return {
             sessionid_: 'session'+Math.floor(2000000 * Math.random()),
-            userid_: 'user'+Math.floor(2000000 * Math.random()),
+            userid_: USER_ID,
             values: ['A',2,3,4,5,6,7,8,9,10,'J','Q','K'],
             values_icons: [null,null,null,null,null,null,null,null,null,null,'chess-knight','chess-queen','crown'],
             suits: ["C","S","H","D"],

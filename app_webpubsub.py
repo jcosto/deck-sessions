@@ -1,58 +1,75 @@
-from flask import Flask, render_template
-from flask_socketio import SocketIO
+from flask import Flask, render_template, jsonify, request
 from secrets import token_hex
 app = Flask(__name__)
 app.config['SECRET_KEY'] = token_hex(32)
-socketio = SocketIO(app)
+
+from azure.messaging.webpubsubservice import WebPubSubServiceClient
+
+from dotenv import load_dotenv
+load_dotenv(".env")
+import os
+PB_SERVICE: WebPubSubServiceClient = WebPubSubServiceClient.from_connection_string(connection_string=os.environ["WebPubSubConnectionString"], hub="decksessions")
 
 @app.route("/")
 def home():
-    return render_template('index-socketio.html')
+    return render_template('index-azurewebpubsub.html')
 
-@socketio.on('my event')
-def handle_my_custom_event(json):
-    print('received json: ' + str(json))
+@app.route("/api/negotiate", methods=["GET"])
+def negotiate():
+    user_id = request.args["userID"]
+    room = request.args["sessionID"]
+    token = PB_SERVICE.get_client_access_token(
+        user_id=user_id,
+        roles=[f"webpubsub.joinLeaveGroup.{room}",
+            f"webpubsub.sendToGroup.{room}"])
+    return jsonify({"url": token['url']})
 
-from flask_socketio import send, emit, join_room
+@app.route('/message/loginevent')
+def handle_my_custom_event(data):
+    user = data["userID"]
+    message = "user logged in %s" % (user,)
+    PB_SERVICE.send_to_all(message, content_type="text/plain")
+    print(message)
 
-@socketio.on('join')
+@app.route('/message/join')
 def on_join(data):
     room = data["sessionID"]
     user = data["userID"]
-    join_room(room)
-    send(user + ' joined the room ' + room, to=room)
+    message = user + ' joined the room ' + room
+    PB_SERVICE.add_user_to_group(room, user)
+    PB_SERVICE.send_to_group(room, message, content_type="text/plain")
     print(user + ' joined the room ' + room)
 
-@socketio.on('deck-initialized')
+@app.route('/message/deck-initialized')
 def handle_deck_initialized(json):
     print('deck-initialized received json: ' + str(json))
     
     room = json["sessionID"]
     emit('server-deck-initialized', json, to=room)
 
-@socketio.on('deck-shuffled')
+@app.route('/message/deck-shuffled')
 def handle_deck_shuffled(json):
     print('deck-shuffled received json: ' + str(json))
     
     room = json["sessionID"]
     emit('server-deck-shuffled', json, to=room)
 
-@socketio.on('card-shown-changed')
-def handle_deck_shuffled(json):
+@app.route('/message/card-shown-changed')
+def handle_card_shown_changed(json):
     print('card-shown-changed received json: ' + str(json))
 
     room = json["sessionID"]
     emit('server-card-shown-changed', json, to=room)
 
-@socketio.on('card-moved')
-def handle_deck_shuffled(json):
+@app.route('/message/card-moved')
+def handle_card_moved(json):
     print('card-moved received json: ' + str(json))
 
     room = json["sessionID"]
     emit('server-card-moved', json, to=room)
 
 def run():
-    socketio.run(app)
+    app.run(debug=True)
 
 if __name__ == '__main__':
     run()

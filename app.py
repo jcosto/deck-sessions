@@ -38,14 +38,14 @@ def handle_deck_shuffled(json):
     emit('server-deck-shuffled', json, to=room)
 
 @socketio.on('card-shown-changed')
-def handle_deck_shuffled(json):
+def handle_card_shown_changed(json):
     print('card-shown-changed received json: ' + str(json))
 
     room = json["sessionID"]
     emit('server-card-shown-changed', json, to=room)
 
 @socketio.on('card-moved')
-def handle_deck_shuffled(json):
+def handle_card_moved(json):
     print('card-moved received json: ' + str(json))
 
     room = json["sessionID"]

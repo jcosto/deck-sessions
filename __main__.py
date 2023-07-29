@@ -12,10 +12,12 @@ if __name__ == "__main__":
         from app import run
         run()
     elif os.environ["MODE"] == "dev" and os.environ["DEPLOYMENT_LOCATION"] == "azure_webpubsub_emulate":
-        raise RuntimeError(
-            "MODE '%s' and DEPLOYMENT_LOCATION '%s' not handled" %
+        print(
+            "MODE '%s' and DEPLOYMENT_LOCATION '%s' set, running flask azure web pubsub (emulated function) implementation" %
             (os.environ["MODE"], os.environ["DEPLOYMENT_LOCATION"])
         )
+        from app_webpubsub import run
+        run()
     elif os.environ["MODE"] == "prod" and os.environ["DEPLOYMENT_LOCATION"] == "azurefunction":
         raise RuntimeError(
             "MODE '%s' and DEPLOYMENT_LOCATION '%s' not handled" %
