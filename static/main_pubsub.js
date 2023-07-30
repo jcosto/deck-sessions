@@ -51,6 +51,11 @@ const ws_opened_event = new Event("ws-opened");
         if (message.type === "message" && message.group===SESSIONID) {
             if (message.data.userID !== USERID) {
                 console.log("message found", message.data)
+                document.dispatchEvent(
+                    new CustomEvent("server-"+message.data.event, {detail: message.data})
+                )
+                console.log("sent event: server-"+message.data.event)
+                
             } else {
                 // console.log("message found from me", message.data)
             }
@@ -219,45 +224,50 @@ document.addEventListener('ws-configured', () => {
                 
                 
                 // socket.emit('join', {sessionID: this.sessionid_, userID: this.userid_})
-                // socket.on('server-deck-state', (data) => {
-                //     if (data.userID!==this.userid_) {
-                //         console.log("received server-deck-state event from other user")
-                //     }
-                // })
-                // socket.on('server-deck-initialized', (data) => {
-                //     console.log(data)
-                //     if (data.userID!==this.userid_) {
-                //         console.log("received server-deck-initialized event from other user")
-                //         // reflect cards from socket to ui
-                //         for (let cardid in data.cards) {
-                //             this.cards_[cardid] = data.cards[cardid]
-                //         }
-                //         this.getAllStacks()
-                //     }
-                // })
-                // socket.on('server-deck-shuffled', (data) => {
-                //     if (data.userID!==this.userid_) {
-                //         console.log("received server-deck-shuffled event from other user")
-                //         // reflect cards from socket to ui
-                //         console.log(data.cards)
-                //         for (let cardid in data.cards) {
-                //             this.cards_[cardid] = data.cards[cardid]
-                //         }
-                //         this.getAllStacks()
-                //     }
-                // })
-                // socket.on('server-card-shown-changed', (data) => {
-                //     if (data.userID!==this.userid_) {
-                //         console.log("received server-card-shown-changed event from other user")
-                //         this.cards_[data.card.id].shown = data.card.shown
-                //     }
-                // })
-                // socket.on('server-card-moved', (data) => {
-                //     if (data.userID!==this.userid_) {
-                //         console.log("received server-card-moved event from other user")
-                //         this.move_card(data.card, data.source, data.destination, sendEvent=false)
-                //     }
-                // })
+                
+                document.addEventListener("server-deck-state", e => {
+                    const data = e.detail
+                    if (data.userID!==this.userid_) {
+                        console.log("received server-deck-state event from other user")
+                    }
+                })
+                document.addEventListener("server-deck-initialized", e => {
+                    const data = e.detail
+                    if (data.userID!==this.userid_) {
+                        console.log("received server-deck-initialized event from other user", data)
+                        // reflect cards from socket to ui
+                        for (let cardid in data.cards) {
+                            this.cards_[cardid] = data.cards[cardid]
+                        }
+                        this.getAllStacks()
+                    }
+                })
+                document.addEventListener("server-deck-shuffled", e => {
+                    const data = e.detail
+                    if (data.userID!==this.userid_) {
+                        console.log("received server-deck-shuffled event from other user")
+                        // reflect cards from socket to ui
+                        console.log(data.cards)
+                        for (let cardid in data.cards) {
+                            this.cards_[cardid] = data.cards[cardid]
+                        }
+                        this.getAllStacks()
+                    }
+                })
+                document.addEventListener("server-card-shown-changed", e => {
+                    const data = e.detail
+                    if (data.userID!==this.userid_) {
+                        console.log("received server-card-shown-changed event from other user")
+                        this.cards_[data.card.id].shown = data.card.shown
+                    }
+                })
+                document.addEventListener("server-card-moved", e => {
+                    const data = e.detail
+                    if (data.userID!==this.userid_) {
+                        console.log("received server-card-moved event from other user")
+                        this.move_card(data.card, data.source, data.destination, sendEvent=false)
+                    }
+                })
             },
         },
         computed: {
