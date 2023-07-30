@@ -11,6 +11,7 @@ function uuidv4() {
   }
   
 const ws_configured_event = new Event("ws-configured");
+const ws_opened_event = new Event("ws-opened");
 
 
 (async function setWS() {
@@ -19,24 +20,16 @@ const ws_configured_event = new Event("ws-configured");
     // console.log(data.url)
     let ws = new WebSocket(data.url, 'json.webpubsub.azure.v1')
     ws.onopen = (e) => {
+        document.dispatchEvent(ws_opened_event)
+
         console.log(e)
         console.log('[open] Connection established')
+        
         ws.send(JSON.stringify({
             type: 'joinGroup',
             group: SESSIONID
         }));
 
-        ws.send(JSON.stringify(
-            {
-                type: 'sendToGroup',
-                group: SESSIONID,
-                dataType: 'json',
-                data: {userID: USERID},
-                ackId: Math.floor(2000000 * Math.random())
-            }
-        ))
-        
-        
     };
 
     ws.onclose = (event) => {
@@ -49,7 +42,7 @@ const ws_configured_event = new Event("ws-configured");
     }
     
     ws.onerror = (error) => {
-        console.error(error)
+        console.log(error)
     }
 
     ws.onmessage = event => {
@@ -58,8 +51,11 @@ const ws_configured_event = new Event("ws-configured");
         if (message.type === "message" && message.group===SESSIONID) {
             if (message.data.userID !== USERID) {
                 console.log("message found", message.data)
+            } else {
+                console.log("message found from me", message.data)
             }
         }
+        return false
     };
 
     
@@ -68,9 +64,6 @@ const ws_configured_event = new Event("ws-configured");
     
     document.dispatchEvent(ws_configured_event)
 
-    
-
-    
 })();
 
 let app = null;
@@ -78,6 +71,8 @@ let app = null;
 const app_configured_event = new Event("app-configured");
 
 document.addEventListener('ws-configured', () => {
+    console.log("received ws-configured event")
+    
     app = Vue.createApp({
         data() {
             return {
@@ -90,10 +85,29 @@ document.addEventListener('ws-configured', () => {
                 cards_: {},
                 stacks_: {},
                 ws: null,
+                allowCardsGenerate: false
             }
         },
         mounted() {
             this.handleChangedJoinSessionID(this.sessionid_)
+            document.addEventListener('ws-opened', () => {
+                console.log("received ws-opened event")
+
+                WS.send(JSON.stringify(
+                    {
+                        type: 'sendToGroup',
+                        group: this.sessionid_,
+                        dataType: 'json',
+                        data: {
+                            userID: this.userid_,
+                            data: "test message after mounting"
+                        },
+                        ackId: Math.floor(2000000 * Math.random())
+                    }
+                ))
+
+                this.allowCardsGenerate = true
+            })            
         },
         methods: {
             getStack(location) {
@@ -149,7 +163,7 @@ document.addEventListener('ws-configured', () => {
                     cobj[kc[0]]=kc[1]
                 }))
                 sendEvent ? WS.send(
-                    {
+                    JSON.stringify({
                         type: 'sendToGroup',
                         group: SESSIONID,
                         dataType: 'json',
@@ -160,15 +174,15 @@ document.addEventListener('ws-configured', () => {
                             cards: cobj
                         },
                         ackId: Math.floor(2000000 * Math.random())
-                    }
+                    })
                 ) : null
             },
             handeCardShownChanged(card) {
                 console.log('card-shown-changed', card)
                 WS.send(
-                    {
+                    JSON.stringify({
                         type: 'sendToGroup',
-                        group: SESSIONID,
+                        group: this.sessionid_,
                         dataType: 'json',
                         data: {
                             event: "card-shown-changed",
@@ -177,7 +191,7 @@ document.addEventListener('ws-configured', () => {
                             userID: this.userid_
                         },
                         ackId: Math.floor(2000000 * Math.random())
-                    }
+                    })
                 )
             },
             getAllStacks() {
@@ -193,8 +207,6 @@ document.addEventListener('ws-configured', () => {
             },
             handleChangedJoinSessionID(joinSessionID_) {
                 this.sessionid_ = joinSessionID_;
-    
-                
                 
                 
                 // socket.emit('join', {sessionID: this.sessionid_, userID: this.userid_})
@@ -241,43 +253,48 @@ document.addEventListener('ws-configured', () => {
         },
         computed: {
             cards() {
-                if (Object.entries(this.cards_).length == 0) {
-                    const cards_ = []
-                    let count = 0
-                    this.suits.forEach((s, sidx) => {
-                        this.values.forEach((v, vidx) => {
-                            const c = {
-                                id: ''+v+s,
-                                suit: s,
-                                suit_icon: this.suits_icons[sidx],
-                                value: v,
-                                value_icon: this.values_icons[vidx],
-                                shown: false,
-                                location: "deck",
-                                seq: count
-                            }
-                            count += 1
-                            cards_[c.id] = c
-                        }) 
-                    });
-                    this.cards_=cards_
-                    this.getStack("deck")
-    
-    
-                    WS.send(
-                        {
-                            type: 'sendToGroup',
-                            group: SESSIONID,
-                            dataType: 'json',
-                            data: {
-                                event: "deck-initialized",
-                                sessionID: this.sessionid_,
-                                userID: this.userid_,
-                                cards: cards_
-                            },
-                            ackId: Math.floor(2000000 * Math.random())
-                        }
-                    )
+                if (this.allowCardsGenerate) {
+                    if (Object.entries(this.cards_).length == 0) {
+                        const cards_ = []
+                        let count = 0
+                        this.suits.forEach((s, sidx) => {
+                            this.values.forEach((v, vidx) => {
+                                const c = {
+                                    id: ''+v+s,
+                                    suit: s,
+                                    suit_icon: this.suits_icons[sidx],
+                                    value: v,
+                                    value_icon: this.values_icons[vidx],
+                                    shown: false,
+                                    location: "deck",
+                                    seq: count
+                                }
+                                count += 1
+                                cards_[c.id] = c
+                            }) 
+                        });
+                        this.cards_=cards_
+                        this.getStack("deck")
+        
+                        const cobj = {}
+                        Object.entries(this.cards_).forEach((kc => {
+                            cobj[kc[0]]=kc[1]
+                        }))
+                        WS.send(
+                            JSON.stringify({
+                                type: 'sendToGroup',
+                                group: SESSIONID,
+                                dataType: 'json',
+                                data: {
+                                    event: "deck-initialized",
+                                    sessionID: this.sessionid_,
+                                    userID: this.userid_,
+                                    cards: cobj
+                                },
+                                ackId: Math.floor(2000000 * Math.random())
+                            })
+                        )
+                    }
                 }
                 return this.cards_
             },
