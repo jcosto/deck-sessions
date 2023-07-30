@@ -52,7 +52,7 @@ const ws_opened_event = new Event("ws-opened");
             if (message.data.userID !== USERID) {
                 console.log("message found", message.data)
             } else {
-                console.log("message found from me", message.data)
+                // console.log("message found from me", message.data)
             }
         }
         return false
@@ -125,13 +125,22 @@ document.addEventListener('ws-configured', () => {
                 console.log("move_card", card, source, destination)
                 this.changeCardLocation(card.id, destination)
     
-                // sendEvent ? socket.emit('card-moved', {
-                //     sessionID: this.sessionid_,
-                //     card: card,
-                //     source: source,
-                //     destination: destination,
-                //     userID: this.userid_
-                // }) : null
+                sendEvent ? WS.send(
+                    JSON.stringify({
+                        type: 'sendToGroup',
+                        group: this.sessionid_,
+                        dataType: 'json',
+                        data: {
+                            event: "card-moved",
+                            sessionID: this.sessionid_,
+                            card: card,
+                            source: source,
+                            destination: destination,
+                            userID: this.userid_
+                        },
+                        ackId: Math.floor(2000000 * Math.random())
+                    })
+                ) : null
             },
             changeCardLocation(cardid, location_dst, sendEvent=true) {
                 console.log("changeCardLocation", cardid, location_dst)
@@ -165,7 +174,7 @@ document.addEventListener('ws-configured', () => {
                 sendEvent ? WS.send(
                     JSON.stringify({
                         type: 'sendToGroup',
-                        group: SESSIONID,
+                        group: this.sessionid_,
                         dataType: 'json',
                         data: {
                             event: "deck-shuffled",
@@ -283,7 +292,7 @@ document.addEventListener('ws-configured', () => {
                         WS.send(
                             JSON.stringify({
                                 type: 'sendToGroup',
-                                group: SESSIONID,
+                                group: this.sessionid_,
                                 dataType: 'json',
                                 data: {
                                     event: "deck-initialized",
