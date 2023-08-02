@@ -90,7 +90,9 @@ document.addEventListener('ws-configured', () => {
                 cards_: {},
                 stacks_: {},
                 ws: null,
-                allowCardsGenerate: false
+                allowCardsGenerate: false,
+                allowCardStateReponse: false,
+                countReceivedCardStateResponses: 0
             }
         },
         mounted() {
@@ -110,8 +112,6 @@ document.addEventListener('ws-configured', () => {
                         ackId: Math.floor(2000000 * Math.random())
                     }
                 ))
-
-                this.allowCardsGenerate = true
             })            
         },
         methods: {
@@ -270,6 +270,77 @@ document.addEventListener('ws-configured', () => {
                     if (data.userID!==this.userid_) {
                         console.log("received server-card-moved event from other user")
                         this.move_card(data.card, data.source, data.destination, sendEvent=false)
+                    }
+                })
+                document.addEventListener("server-cards-state-request", e => {
+                    const data = e.detail
+                    if (data.userID!==this.userid_) {
+                        console.log("received server-cards-state-request event from other user")
+                        const cobj = {}
+                        Object.entries(this.cards_).forEach((kc => {
+                            cobj[kc[0]]=kc[1]
+                        }))
+                        WS.send(
+                            JSON.stringify({
+                                type: 'sendToGroup',
+                                group: this.sessionid_,
+                                dataType: 'json',
+                                data: {
+                                    event: "cards-state-response",
+                                    sessionID: this.sessionid_,
+                                    userID: this.userid_,
+                                    cards: cobj
+                                },
+                                ackId: Math.floor(2000000 * Math.random())
+                            })
+                        )
+                    }
+                })
+
+                this.allowCardsGenerate = false
+                this.allowCardStateReponse = true
+                console.log(`setting this.allowCardStateReponse to ${this.allowCardStateReponse}`)
+                this.countReceivedCardStateResponses = 0
+                setTimeout(() => {
+                    this.allowCardStateReponse = false
+                    if (this.countReceivedCardStateResponses === 0) {
+                        this.allowCardsGenerate = true
+                    }
+                    console.log(`setting this.allowCardStateReponse to ${this.allowCardStateReponse}`)
+                }, 5000)
+                WS.send(
+                    JSON.stringify({
+                        type: 'sendToGroup',
+                        group: this.sessionid_,
+                        dataType: 'json',
+                        data: {
+                            event: "cards-state-request",
+                            sessionID: this.sessionid_,
+                            userID: this.userid_,
+                        },
+                        ackId: Math.floor(2000000 * Math.random())
+                    })
+                )
+
+                document.addEventListener("server-cards-state-response", e => {
+                    if (!this.allowCardStateReponse) {
+                        console.log(`ignoring server-cards-state-response event from other user after timeout`)
+                        return
+                    }
+                    const data = e.detail
+                    if (data.userID!==this.userid_) {
+                        console.log("received server-cards-state-response event from other user")
+                        // reflect cards from socket to ui
+                        if (this.countReceivedCardStateResponses > 3) {
+                            console.log(`ignoring server-cards-state-response event from other user after more than allowed responses`)
+                            return
+                        }
+                        console.log(data.cards)
+                        for (let cardid in data.cards) {
+                            this.cards_[cardid] = data.cards[cardid]
+                        }
+                        this.getAllStacks()
+                        this.countReceivedCardStateResponses += 1
                     }
                 })
             },
