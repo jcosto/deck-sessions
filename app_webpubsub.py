@@ -10,8 +10,9 @@ load_dotenv(".env")
 import os
 PB_SERVICE: WebPubSubServiceClient = WebPubSubServiceClient.from_connection_string(connection_string=os.environ["WebPubSubConnectionString"], hub="decksessions")
 
-@app.route("/")
+@app.route("/api/index")
 def home():
+    code = request.args["code"]
     return render_template('index-azurewebpubsub.html')
 
 @app.route("/api/negotiate", methods=["GET"])

@@ -1,4 +1,105 @@
-const SESSIONID = !!new URL(window.location).searchParams.get("sessionID") ?
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Vue Mastery</title>
+        <!-- Import Vue.js -->
+        
+        <script src="https://unpkg.com/vue@3.0.11/dist/vue.global.js"></script>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" integrity="sha512-fD9DI5bZwQxOi7MhYWnnNPlvXdp/2Pj3XSTRrFs5FQa4mizyGLnJcN6tuvUS6LbmgN1ut+XGSABKvjN0H6Aoow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+        <!-- <link rel="stylesheet" href="./assets/card.css" /> -->
+        <style>.card-container-container{
+  width: 170px;
+  margin:10px;
+  display: inline-flex;
+  flex-wrap: wrap;
+}
+.card-container {
+  width: 170px;
+  height: 250px;
+  position: relative;
+  -ms-perspective: 800px;
+  perspective: 800px;
+  border-radius: 4px;
+}
+
+.card {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  cursor: pointer;
+}
+.card div {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 6px;
+  background: #fff;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  -o-box-pack: center;
+  justify-content: center;
+  -o-box-align: center;
+  align-items: center;
+  font: 16px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: #47525d;
+}
+.card .front {
+  background:
+      conic-gradient(from 0deg at calc(500%/6) calc(100%/3),#8b8bbb 0 120deg,#0000 0),
+      conic-gradient(from -120deg at calc(100%/6) calc(100%/3),#53538d 0 120deg,#0000 0),
+      conic-gradient(from 120deg at calc(100%/3) calc(500%/6),#2d2d4d 0 120deg,#0000 0),
+      conic-gradient(from 120deg at calc(200%/3) calc(500%/6),#2d2d4d 0 120deg,#0000 0),
+      conic-gradient(from -180deg at calc(100%/3) 50%,#53538d  60deg,#2d2d4d 0 120deg,#0000 0),
+      conic-gradient(from 60deg at calc(200%/3) 50%,#2d2d4d  60deg,#8b8bbb 0 120deg,#0000 0),
+      conic-gradient(from -60deg at 50% calc(100%/3),#2d2d4d 120deg,#53538d 0 240deg,#8b8bbb 0);
+  background-size: 111px 64px;
+}
+.card .back {
+  transform: rotateY(180deg);
+}
+.card.flipped {
+  transform: rotateY(180deg);
+}</style>
+        <style>
+            body {
+                background-color: darkslategrey;
+                background-image: url(data:image/png;base64,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);
+
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <card-table
+                :sessionid = "sessionid_"
+                :deck="deck"
+                :table="table"
+                :cards="cards"
+                @move-card="move_card"
+                @changed-session-id="handleChangedJoinSessionID"
+                @card-shown-changed="handeCardShownChanged"
+                @shuffle-deck="shuffleDeck"
+            >
+            </card-table>
+        </div>
+
+        <script>const SESSIONID = !!new URL(window.location).searchParams.get("sessionID") ?
     new URL(window.location).searchParams.get("sessionID") :
     'session'+Math.floor(2000000 * Math.random())
 const USERID = 'user'+Math.floor(2000000 * Math.random())
@@ -419,4 +520,142 @@ function shuffleArray(array) {
         [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
+}</script>
+        <script>document.addEventListener('app-configured', () => {
+    app.component('card-table', {
+        props: {
+            sessionid: {},
+            deck: {},
+            table: {},
+            userid: {}
+        },
+        template:
+        `
+        <div class="card-session">
+            <h1>
+                Session
+                <button @click="showSessionIDInput" v-if="!showJoinSessionID">{{sessionid}}</button>
+                <input type="text" v-model="newSessionID" v-if="showJoinSessionID" @change="handleChangedJoinSessionID" @blur="hideSessionIDInput">
+            </h1>
+            <div class="table">
+                <div class="row">
+                    <div class="col-2">
+                        <h1>Deck ({{deck.length}}) <button @click="shuffleDeck">Shuffle Deck</button></h1>
+                        <div v-if="deck.length > 0">
+                            <card-card
+                                v-for="(card, cardIndex) in [deck[deck.length-1]]"
+                                :key="card.id"
+                                :card="card"
+                                :cardlocation="'deck'"
+                                :cardshown="card.shown"
+                                @move-card="move_card"
+                                @card-shown-changed="cardShownChanged"
+                            ></card-card>
+                        </div>
+                    </div>
+                    <div class="col-10">
+                        <h1>Table ({{table.length}})</h1>
+                        <div v-if="table.length > 0">
+                            <card-card
+                                v-for="(card, cardIndex) in table"
+                                :key="card.id"
+                                :card="card"
+                                :cardlocation="'table'"
+                                :cardshown="card.shown"
+                                @move-card="move_card"
+                                @card-shown-changed="cardShownChanged"
+                            ></card-card>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `,
+        data() {
+            return {
+                showJoinSessionID: false,
+                newSessionID: null,
+            }
+        },
+        methods: {
+            showSessionIDInput() {
+                this.newSessionID = this.sessionid
+                this.showJoinSessionID = true
+                console.log("showSessionIDInput", this.showJoinSessionID)
+            },
+            hideSessionIDInput() {
+                this.showJoinSessionID = false
+                console.log("hideSessionIDInput", this.showJoinSessionID)
+            },
+            handleChangedJoinSessionID() {
+                console.log("changed-session-id", this.newSessionID)
+                this.$emit("changed-session-id", this.newSessionID)
+                this.showJoinSessionID = false
+            },
+            cardShownChanged(card, sendEvent=true){
+                sendEvent ? this.$emit('card-shown-changed', card) : null
+            },
+            move_card(card, source, destination, sendEvent=true){
+                sendEvent ? this.$emit('move-card', card, source, destination) : null
+            },
+            shuffleDeck() {
+                this.$emit('shuffle-deck')
+            }
+        }
+    })
+    
+})
+</script>
+        <script>function flipCard(e) {
+    e.getElementsByClassName('card')[0].classList.toggle('flipped')
 }
+document.addEventListener('app-configured', () => {
+    app.component('card-card', {
+        props: {
+            card: {},
+            cardlocation: {},
+            cardshown: {}
+        },
+        template: 
+        `
+        <div class="card-container-container">
+            <div class="card-container" @click="toggleCardShown">
+                <div class="card" :class="{ flipped: cardshown }" >
+                    <div class="front"></div>
+                    <div class="back">
+                        <h1 :class="card.suit=='H' || card.suit=='D' ? 'text-danger' : 'text-dark'">
+                            <i v-if="!!card.value_icon" class="fa-solid" :class="'fa-'+card.value_icon"></i>
+                            <span v-else>
+                                {{card.value}}
+                            </span>
+                            <i v-if="!!card.suit_icon" class="fa-solid" :class="'fa-'+card.suit_icon"></i>
+                        </h1>
+                    </div>
+                </div>
+            </div>
+            <button @click="dealToLocation('table')" v-if="cardlocation!=='table'">Set on table</button>
+            <button @click="dealToLocation('deck')" v-if="cardlocation!=='deck'">Return to deck</button>
+        </div>
+        `,
+        methods: {
+            toggleCardShown() {
+                this.card.shown = !this.card.shown
+                this.$emit('card-shown-changed', this.card)
+            },
+            dealToLocation(location) {
+                this.$emit('move-card', this.card, this.cardlocation, location)
+            }
+        },
+    })
+})
+</script>
+        
+
+        <!-- Mount App -->
+        <script>
+            document.addEventListener('app-configured', () => {
+                const mountedApp = app.mount('#app')
+            })
+        </script>
+    </body>
+</html>
