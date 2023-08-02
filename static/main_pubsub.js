@@ -220,13 +220,18 @@ document.addEventListener('ws-configured', () => {
                 })
             },
             handleChangedJoinSessionID(joinSessionID_) {
+                if (this.sessionid_ !== joinSessionID_) {
+                    window.location.href="/?sessionID="+joinSessionID_
+                    return
+                }
+
                 this.sessionid_ = joinSessionID_;
                 
                 
                 // socket.emit('join', {sessionID: this.sessionid_, userID: this.userid_})
                 WS.send(JSON.stringify({
                     type: 'joinGroup',
-                    group: SESSIONID
+                    group: this.sessionid_
                 }));
                 
                 document.addEventListener("server-deck-state", e => {
