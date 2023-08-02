@@ -25,10 +25,10 @@ const ws_opened_event = new Event("ws-opened");
         console.log(e)
         console.log('[open] Connection established')
         
-        ws.send(JSON.stringify({
-            type: 'joinGroup',
-            group: SESSIONID
-        }));
+        // ws.send(JSON.stringify({
+        //     type: 'joinGroup',
+        //     group: SESSIONID
+        // }));
 
     };
 
@@ -94,9 +94,9 @@ document.addEventListener('ws-configured', () => {
             }
         },
         mounted() {
-            this.handleChangedJoinSessionID(this.sessionid_)
             document.addEventListener('ws-opened', () => {
                 console.log("received ws-opened event")
+                this.handleChangedJoinSessionID(this.sessionid_)
 
                 WS.send(JSON.stringify(
                     {
@@ -224,6 +224,10 @@ document.addEventListener('ws-configured', () => {
                 
                 
                 // socket.emit('join', {sessionID: this.sessionid_, userID: this.userid_})
+                WS.send(JSON.stringify({
+                    type: 'joinGroup',
+                    group: SESSIONID
+                }));
                 
                 document.addEventListener("server-deck-state", e => {
                     const data = e.detail

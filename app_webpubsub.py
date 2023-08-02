@@ -24,50 +24,6 @@ def negotiate():
             f"webpubsub.sendToGroup.{room}"])
     return jsonify({"url": token['url']})
 
-@app.route('/message/loginevent')
-def handle_my_custom_event(data):
-    user = data["userID"]
-    message = "user logged in %s" % (user,)
-    PB_SERVICE.send_to_all(message, content_type="text/plain")
-    print(message)
-
-@app.route('/message/join')
-def on_join(data):
-    room = data["sessionID"]
-    user = data["userID"]
-    message = user + ' joined the room ' + room
-    PB_SERVICE.add_user_to_group(room, user)
-    PB_SERVICE.send_to_group(room, message, content_type="text/plain")
-    print(user + ' joined the room ' + room)
-
-@app.route('/message/deck-initialized')
-def handle_deck_initialized(json):
-    print('deck-initialized received json: ' + str(json))
-    
-    room = json["sessionID"]
-    emit('server-deck-initialized', json, to=room)
-
-@app.route('/message/deck-shuffled')
-def handle_deck_shuffled(json):
-    print('deck-shuffled received json: ' + str(json))
-    
-    room = json["sessionID"]
-    emit('server-deck-shuffled', json, to=room)
-
-@app.route('/message/card-shown-changed')
-def handle_card_shown_changed(json):
-    print('card-shown-changed received json: ' + str(json))
-
-    room = json["sessionID"]
-    emit('server-card-shown-changed', json, to=room)
-
-@app.route('/message/card-moved')
-def handle_card_moved(json):
-    print('card-moved received json: ' + str(json))
-
-    room = json["sessionID"]
-    emit('server-card-moved', json, to=room)
-
 def run():
     app.run(debug=True)
 
