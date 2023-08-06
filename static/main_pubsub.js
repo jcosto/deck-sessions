@@ -13,63 +13,97 @@ function uuidv4() {
 const ws_configured_event = new Event("ws-configured");
 const ws_opened_event = new Event("ws-opened");
 
-
-(async function setWS() {
-    let res = await fetch(`${window.location.origin}/api/negotiate?userID=${USERID}&sessionID=${SESSIONID}`)
-    let data = await res.json()
-    // console.log(data.url)
-    let ws = new WebSocket(data.url, 'json.webpubsub.azure.v1')
-    ws.onopen = (e) => {
-        document.dispatchEvent(ws_opened_event)
-
-        console.log(e)
-        console.log('[open] Connection established')
-        
-        // ws.send(JSON.stringify({
-        //     type: 'joinGroup',
-        //     group: SESSIONID
-        // }));
-
-    };
-
-    ws.onclose = (event) => {
-        if (event.wasClean) {
-            console.log(`[close] Connect closed cleanly, code=${event.code} reason=${event.reason}`);
-        } else {
-            alert('[close] Connection died')
-            console.error(`[close] Connect closed with error, code=${event.code} reason=${event.reason}`)
-        }
+class PubSubHandler {
+    constructor() {
+        this.ws = null
     }
+    async setWS() {
+        let res = await fetch(`${window.location.origin}/api/negotiate?userID=${USERID}&sessionID=${SESSIONID}`)
+        let data = await res.json()
+        // console.log(data.url)
+        let ws = new WebSocket(data.url, 'json.webpubsub.azure.v1')
+        ws.onopen = (e) => {
+            document.dispatchEvent(ws_opened_event)
     
-    ws.onerror = (error) => {
-        console.log(error)
-    }
-
-    ws.onmessage = event => {
-        // console.log("message from server:", event.data)
-        let message = JSON.parse(event.data)
-        if (message.type === "message" && message.group===SESSIONID) {
-            if (message.data.userID !== USERID) {
-                console.log("message found", message.data)
-                document.dispatchEvent(
-                    new CustomEvent("server-"+message.data.event, {detail: message.data})
-                )
-                console.log("sent event: server-"+message.data.event)
-                
+            console.log(e)
+            console.log('[open] Connection established')
+            
+            // ws.send(JSON.stringify({
+            //     type: 'joinGroup',
+            //     group: SESSIONID
+            // }));
+    
+        };
+    
+        ws.onclose = (event) => {
+            if (event.wasClean) {
+                console.log(`[close] Connect closed cleanly, code=${event.code} reason=${event.reason}`);
             } else {
-                // console.log("message found from me", message.data)
+                alert('[close] Connection died')
+                console.error(`[close] Connect closed with error, code=${event.code} reason=${event.reason}`)
             }
         }
-        return false
-    };
-
+        
+        ws.onerror = (error) => {
+            console.log(error)
+        }
     
-    WS = ws;
-    console.log("set WS");
+        ws.onmessage = event => {
+            // console.log("message from server:", event.data)
+            let message = JSON.parse(event.data)
+            if (message.type === "message" && message.group===SESSIONID) {
+                if (message.data.userID !== USERID) {
+                    console.log("message found", message.data)
+                    document.dispatchEvent(
+                        new CustomEvent("server-"+message.data.event, {detail: message.data})
+                    )
+                    console.log("sent event: server-"+message.data.event)
+                    
+                } else {
+                    // console.log("message found from me", message.data)
+                }
+            }
+            return false
+        };
     
-    document.dispatchEvent(ws_configured_event)
+        
+        this.ws = ws
+        console.log("set WS");
+        
+        document.dispatchEvent(ws_configured_event)
+    
+    }
+    async sendData (sessionid_, data) {
+        if (this.ws === null) {
 
-})();
+        } else {
+            this.ws.send(JSON.stringify(
+                {
+                    type: 'sendToGroup',
+                    group: sessionid_,
+                    dataType: 'json',
+                    data: data,
+                    ackId: Math.floor(2000000 * Math.random())
+                }
+            ))
+        }
+    }
+    async joinGroup(sessionid_) {
+        if (this.ws === null) {
+
+        } else {
+            this.ws.send(JSON.stringify({
+                type: 'joinGroup',
+                group: sessionid_
+            }));
+        }
+    }
+}
+
+const psh = new PubSubHandler()
+psh.setWS().catch(e =>{
+    console.error(e)
+})
 
 let app = null;
 
@@ -100,18 +134,10 @@ document.addEventListener('ws-configured', () => {
                 console.log("received ws-opened event")
                 this.handleChangedJoinSessionID(this.sessionid_)
 
-                WS.send(JSON.stringify(
-                    {
-                        type: 'sendToGroup',
-                        group: this.sessionid_,
-                        dataType: 'json',
-                        data: {
-                            userID: this.userid_,
-                            data: "test message after mounting"
-                        },
-                        ackId: Math.floor(2000000 * Math.random())
-                    }
-                ))
+                psh.sendData(this.sessionid_, {
+                    userID: this.userid_,
+                    data: "test message after mounting"
+                })
             })            
         },
         methods: {
@@ -130,22 +156,14 @@ document.addEventListener('ws-configured', () => {
                 console.log("move_card", card, source, destination)
                 this.changeCardLocation(card.id, destination)
     
-                sendEvent ? WS.send(
-                    JSON.stringify({
-                        type: 'sendToGroup',
-                        group: this.sessionid_,
-                        dataType: 'json',
-                        data: {
-                            event: "card-moved",
-                            sessionID: this.sessionid_,
-                            card: card,
-                            source: source,
-                            destination: destination,
-                            userID: this.userid_
-                        },
-                        ackId: Math.floor(2000000 * Math.random())
-                    })
-                ) : null
+                sendEvent ? psh.sendData(this.sessionid_, {
+                    event: "card-moved",
+                    sessionID: this.sessionid_,
+                    card: card,
+                    source: source,
+                    destination: destination,
+                    userID: this.userid_
+                }) : null
             },
             changeCardLocation(cardid, location_dst, sendEvent=true) {
                 console.log("changeCardLocation", cardid, location_dst)
@@ -176,37 +194,21 @@ document.addEventListener('ws-configured', () => {
                 Object.entries(this.cards_).forEach((kc => {
                     cobj[kc[0]]=kc[1]
                 }))
-                sendEvent ? WS.send(
-                    JSON.stringify({
-                        type: 'sendToGroup',
-                        group: this.sessionid_,
-                        dataType: 'json',
-                        data: {
-                            event: "deck-shuffled",
-                            sessionID: this.sessionid_,
-                            userID: this.userid_,
-                            cards: cobj
-                        },
-                        ackId: Math.floor(2000000 * Math.random())
-                    })
-                ) : null
+                sendEvent ? psh.sendData(this.sessionid_, {
+                    event: "deck-shuffled",
+                    sessionID: this.sessionid_,
+                    userID: this.userid_,
+                    cards: cobj
+                }) : null
             },
             handeCardShownChanged(card) {
                 console.log('card-shown-changed', card)
-                WS.send(
-                    JSON.stringify({
-                        type: 'sendToGroup',
-                        group: this.sessionid_,
-                        dataType: 'json',
-                        data: {
-                            event: "card-shown-changed",
-                            sessionID: this.sessionid_,
-                            card: card,
-                            userID: this.userid_
-                        },
-                        ackId: Math.floor(2000000 * Math.random())
-                    })
-                )
+                psh.sendData(this.sessionid_, {
+                    event: "card-shown-changed",
+                    sessionID: this.sessionid_,
+                    card: card,
+                    userID: this.userid_
+                })
             },
             getAllStacks() {
                 const locations = []
@@ -227,12 +229,7 @@ document.addEventListener('ws-configured', () => {
 
                 this.sessionid_ = joinSessionID_;
                 
-                
-                // socket.emit('join', {sessionID: this.sessionid_, userID: this.userid_})
-                WS.send(JSON.stringify({
-                    type: 'joinGroup',
-                    group: this.sessionid_
-                }));
+                psh.joinGroup(this.sessionid_)
                 
                 document.addEventListener("server-deck-state", e => {
                     const data = e.detail
@@ -285,20 +282,12 @@ document.addEventListener('ws-configured', () => {
                         Object.entries(this.cards_).forEach((kc => {
                             cobj[kc[0]]=kc[1]
                         }))
-                        WS.send(
-                            JSON.stringify({
-                                type: 'sendToGroup',
-                                group: this.sessionid_,
-                                dataType: 'json',
-                                data: {
-                                    event: "cards-state-response",
-                                    sessionID: this.sessionid_,
-                                    userID: this.userid_,
-                                    cards: cobj
-                                },
-                                ackId: Math.floor(2000000 * Math.random())
-                            })
-                        )
+                        psh.sendData(this.sessionid_, {
+                            event: "cards-state-response",
+                            sessionID: this.sessionid_,
+                            userID: this.userid_,
+                            cards: cobj
+                        })
                     }
                 })
 
@@ -313,19 +302,11 @@ document.addEventListener('ws-configured', () => {
                     }
                     console.log(`setting this.allowCardStateReponse to ${this.allowCardStateReponse}`)
                 }, 5000)
-                WS.send(
-                    JSON.stringify({
-                        type: 'sendToGroup',
-                        group: this.sessionid_,
-                        dataType: 'json',
-                        data: {
-                            event: "cards-state-request",
-                            sessionID: this.sessionid_,
-                            userID: this.userid_,
-                        },
-                        ackId: Math.floor(2000000 * Math.random())
-                    })
-                )
+                psh.sendData(this.sessionid_, {
+                    event: "cards-state-request",
+                    sessionID: this.sessionid_,
+                    userID: this.userid_,
+                })
 
                 document.addEventListener("server-cards-state-response", e => {
                     if (!this.allowCardStateReponse) {
@@ -379,20 +360,12 @@ document.addEventListener('ws-configured', () => {
                         Object.entries(this.cards_).forEach((kc => {
                             cobj[kc[0]]=kc[1]
                         }))
-                        WS.send(
-                            JSON.stringify({
-                                type: 'sendToGroup',
-                                group: this.sessionid_,
-                                dataType: 'json',
-                                data: {
-                                    event: "deck-initialized",
-                                    sessionID: this.sessionid_,
-                                    userID: this.userid_,
-                                    cards: cobj
-                                },
-                                ackId: Math.floor(2000000 * Math.random())
-                            })
-                        )
+                        psh.sendData(this.sessionid_, {
+                            event: "deck-initialized",
+                            sessionID: this.sessionid_,
+                            userID: this.userid_,
+                            cards: cobj
+                        })
                     }
                 }
                 return this.cards_
