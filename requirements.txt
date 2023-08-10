@@ -2,3 +2,4 @@ flask
 flask-socketio
 simple-websocket
 azure-messaging-webpubsubservice
+python-dotenv

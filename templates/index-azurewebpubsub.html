@@ -29,10 +29,13 @@
                 :deck="deck"
                 :table="table"
                 :cards="cards"
+                :connectionstatusstate="connectionStatusState_"
+                :connectionstatusmessage="connectionStatusMessage_"
                 @move-card="move_card"
                 @changed-session-id="handleChangedJoinSessionID"
                 @card-shown-changed="handeCardShownChanged"
                 @shuffle-deck="shuffleDeck"
+                @reset-deck="resetDeck"
             >
             </card-table>
         </div>
@@ -44,9 +47,8 @@
 
         <!-- Mount App -->
         <script>
-            document.addEventListener('app-configured', () => {
-                const mountedApp = app.mount('#app')
-            })
+            const mountedApp = app.mount('#app')
+            
         </script>
     </body>
 </html>
