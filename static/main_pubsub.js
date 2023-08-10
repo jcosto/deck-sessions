@@ -122,7 +122,8 @@ const app = Vue.createApp({
             allowCardStateReponse: false,
             countReceivedCardStateResponses: 0,
             connectionStatusState_: false,
-            connectionStatusMessage_: "Offline"
+            connectionStatusMessage_: "Offline",
+            locations: ["deck", "table"]
         }
     },
     mounted() {
@@ -244,13 +245,12 @@ const app = Vue.createApp({
             })
         },
         getAllStacks() {
-            const locations = []
             for (let k in this.cards_) {
-                if (!locations.includes(this.cards_[k].location)) {
-                    locations.push(this.cards_[k].location)
+                if (!this.locations.includes(this.cards_[k].location)) {
+                    this.locations.push(this.cards_[k].location)
                 }
             }
-            locations.forEach(location => {
+            this.locations.forEach(location => {
                 this.getStack(location)
             })
         },
@@ -382,9 +382,6 @@ const app = Vue.createApp({
         },
         table() {
             return "table" in this.stacks_ ? this.stacks_["table"] : []
-        },
-        hand() {
-            return "hand" in this.stacks_ ?  this.stacks_["hand"] : []
         }
     }
 })
