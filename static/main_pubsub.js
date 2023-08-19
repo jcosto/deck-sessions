@@ -336,6 +336,7 @@ const app = Vue.createApp({
                 this.allowCardStateReponse = false
                 if (this.countReceivedCardStateResponses === 0) {
                     this.allowCardsGenerate = true
+                    document.dispatchEvent(new Event("show-welcome-modal-ready"))
                 }
                 console.log(`setting this.allowCardStateReponse to ${this.allowCardStateReponse}`)
             }, 5000)
@@ -364,6 +365,7 @@ const app = Vue.createApp({
                     }
                     this.getAllStacks()
                     this.countReceivedCardStateResponses += 1
+                    document.dispatchEvent(new Event("show-welcome-modal-ready"))
                 }
             })
         },
