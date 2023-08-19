@@ -3,20 +3,33 @@ app.component('card-table', {
         sessionid: {},
         deck: {},
         table: {},
-        userid: {}
+        userid: {},
+        connectionstatusstate: {},
+        connectionstatusmessage: {}
     },
     template:
     `
     <div class="card-session">
-        <h1>
-            Session
-            <button @click="showSessionIDInput" v-if="!showJoinSessionID">{{sessionid}}</button>
-            <input type="text" v-model="newSessionID" v-if="showJoinSessionID" @change="handleChangedJoinSessionID" @blur="hideSessionIDInput">
-        </h1>
         <div class="table">
             <div class="row">
-                <div class="col">
-                    <h1>Deck ({{deck.length}}) <button @click="shuffleDeck">Shuffle Deck</button></h1>
+                <div class="col-10">
+                    <h1>
+                        Session
+                        <button @click="showSessionIDInput" v-if="!showJoinSessionID">{{sessionid}}</button>
+                        <input type="text" v-model="newSessionID" v-if="showJoinSessionID" @change="handleChangedJoinSessionID" @blur="hideSessionIDInput">
+                    </h1>
+                </div>
+                <div class="col-2">
+                    <span :class="connectionstatusstate ? 'text-success' : 'text-warning'">{{connectionstatusmessage}}</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-2">
+                    <h1>
+                        Deck ({{deck.length}})
+                        <button @click="shuffleDeck">Shuffle Deck</button>
+                        <button @click="resetDeck">Reset Deck</button>
+                    </h1>
                     <div v-if="deck.length > 0">
                         <card-card
                             v-for="(card, cardIndex) in [deck[deck.length-1]]"
@@ -29,7 +42,7 @@ app.component('card-table', {
                         ></card-card>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col-10">
                     <h1>Table ({{table.length}})</h1>
                     <div v-if="table.length > 0">
                         <card-card
@@ -76,6 +89,9 @@ app.component('card-table', {
         },
         shuffleDeck() {
             this.$emit('shuffle-deck')
+        },
+        resetDeck() {
+            this.$emit('reset-deck')
         }
     }
 })

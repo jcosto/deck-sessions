@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Deck Sesh</title>
+        
+        <script src="https://unpkg.com/vue@3.0.11/dist/vue.global.js"></script>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" integrity="sha512-fD9DI5bZwQxOi7MhYWnnNPlvXdp/2Pj3XSTRrFs5FQa4mizyGLnJcN6tuvUS6LbmgN1ut+XGSABKvjN0H6Aoow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+        <style>.card-container-container{
+  width: 170px;
+  margin:10px;
+  display: inline-flex;
+  flex-wrap: wrap;
+}
+.card-container {
+  width: 170px;
+  height: 250px;
+  position: relative;
+  -ms-perspective: 800px;
+  perspective: 800px;
+  border-radius: 4px;
+}
+
+.card {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  cursor: pointer;
+}
+.card div {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 6px;
+  background: #fff;
+  display: -ms-flexbox;
+  display: box;
+  display: flex;
+  -o-box-pack: center;
+  justify-content: center;
+  -o-box-align: center;
+  align-items: center;
+  font: 16px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: #47525d;
+}
+.card .front {
+  background:
+      conic-gradient(from 0deg at calc(500%/6) calc(100%/3),#8b8bbb 0 120deg,#0000 0),
+      conic-gradient(from -120deg at calc(100%/6) calc(100%/3),#53538d 0 120deg,#0000 0),
+      conic-gradient(from 120deg at calc(100%/3) calc(500%/6),#2d2d4d 0 120deg,#0000 0),
+      conic-gradient(from 120deg at calc(200%/3) calc(500%/6),#2d2d4d 0 120deg,#0000 0),
+      conic-gradient(from -180deg at calc(100%/3) 50%,#53538d  60deg,#2d2d4d 0 120deg,#0000 0),
+      conic-gradient(from 60deg at calc(200%/3) 50%,#2d2d4d  60deg,#8b8bbb 0 120deg,#0000 0),
+      conic-gradient(from -60deg at 50% calc(100%/3),#2d2d4d 120deg,#53538d 0 240deg,#8b8bbb 0);
+  background-size: 111px 64px;
+}
+.card .back {
+  transform: rotateY(180deg);
+}
+.card.flipped {
+  transform: rotateY(180deg);
+}</style>
+        <style>
+            body {
+                background-color: darkslategrey;
+                background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWDg4N3d3dtbW17e3t1dXWBgYGHh4d5eXlzc3OLi4ubm5uVlZWPj4+NjY19fX2JiYl/f39ra2uRkZGZmZlpaWmXl5dvb29xcXGTk5NnZ2c8TV1mAAAAG3RSTlNAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAvEOwtAAAFVklEQVR4XpWWB67c2BUFb3g557T/hRo9/WUMZHlgr4Bg8Z4qQgQJlHI4A8SzFVrapvmTF9O7dmYRFZ60YiBhJRCgh1FYhiLAmdvX0CzTOpNE77ME0Zty/nWWzchDtiqrmQDeuv3powQ5ta2eN0FY0InkqDD73lT9c9lEzwUNqgFHs9VQce3TVClFCQrSTfOiYkVJQBmpbq2L6iZavPnAPcoU0dSw0SUTqz/GtrGuXfbyyBniKykOWQWGqwwMA7QiYAxi+IlPdqo+hYHnUt5ZPfnsHJyNiDtnpJyayNBkF6cWoYGAMY92U2hXHF/C1M8uP/ZtYdiuj26UdAdQQSXQErwSOMzt/XWRWAz5GuSBIkwG1H3FabJ2OsUOUhGC6tK4EMtJO0ttC6IBD3kM0ve0tJwMdSfjZo+EEISaeTr9P3wYrGjXqyC1krcKdhMpxEnt5JetoulscpyzhXN5FRpuPHvbeQaKxFAEB6EN+cYN6xD7RYGpXpNndMmZgM5Dcs3YSNFDHUo2LGfZuukSWyUYirJAdYbF3MfqEKmjM+I2EfhA94iG3L7uKrR+GdWD73ydlIB+6hgref1QTlmgmbM3/LeX5GI1Ux1RWpgxpLuZ2+I+IjzZ8wqE4nilvQdkUdfhzI5QDWy+kw5Wgg2pGpeEVeCCA7b85BO3F9DzxB3cdqvBzWcmzbyMiqhzuYqtHRVG2y4x+KOlnyqla8AoWWpuBoYRxzXrfKuILl6SfiWCbjxoZJUaCBj1CjH7GIaDbc9kqBY3W/Rgjda1iqQcOJu2WW+76pZC9QG7M00dffe9hNnseupFL53r8F7YHSwJWUKP2q+k7RdsxyOB11n0xtOvnW4irMMFNV4H0uqwS5ExsmP9AxbDTc9JwgneAT5vTiUSm1E7BSflSt3bfa1tv8Di3R8n3Af7MNWzs49hmauE2wP+ttrq+AsWpFG2awvsuOqbipWHgtuvuaAE+A1Z/7gC9hesnr+7wqCwG8c5yAg3AL1fm8T9AZtp/bbJGwl1pNrE7RuOX7PeMRUERVaPpEs+yqeoSmuOlokqw49pgomjLeh7icHNlG19yjs6XXOMedYm5xH2YxpV2tc0Ro2jJfxC50ApuxGob7lMsxfTbeUv07TyYxpeLucEH1gNd4IKH2LAg5TdVhlCafZvpskfncCfx8pOhJzd76bJWeYFnFciwcYfubRc12Ip/ppIhA1/mSZ/RxjFDrJC5xifFjJpY2Xl5zXdguFqYyTR1zSp1Y9p+tktDYYSNflcxI0iyO4TPBdlRcpeqjK/piF5bklq77VSEaA+z8qmJTFzIWiitbnzR794USKBUaT0NTEsVjZqLaFVqJoPN9ODG70IPbfBHKK+/q/AWR0tJzYHRULOa4MP+W/HfGadZUbfw177G7j/OGbIs8TahLyynl4X4RinF793Oz+BU0saXtUHrVBFT/DnA3ctNPoGbs4hRIjTok8i+algT1lTHi4SxFvONKNrgQFAq2/gFnWMXgwffgYMJpiKYkmW3tTg3ZQ9Jq+f8XN+A5eeUKHWvJWJ2sgJ1Sop+wwhqFVijqWaJhwtD8MNlSBeWNNWTa5Z5kPZw5+LbVT99wqTdx29lMUH4OIG/D86ruKEauBjvH5xy6um/Sfj7ei6UUVk4AIl3MyD4MSSTOFgSwsH/QJWaQ5as7ZcmgBZkzjjU1UrQ74ci1gWBCSGHtuV1H2mhSnO3Wp/3fEV5a+4wz//6qy8JxjZsmxxy5+4w9CDNJY09T072iKG0EnOS0arEYgXqYnXcYHwjTtUNAcMelOd4xpkoqiTYICWFq0JSiPfPDQdnt+4/wuqcXY47QILbgAAAABJRU5ErkJggg==);
+
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <card-table
+                :sessionid = "sessionid_"
+                :deck="deck"
+                :table="table"
+                :cards="cards"
+                :connectionstatusstate="connectionStatusState_"
+                :connectionstatusmessage="connectionStatusMessage_"
+                @move-card="move_card"
+                @changed-session-id="handleChangedJoinSessionID"
+                @card-shown-changed="handeCardShownChanged"
+                @shuffle-deck="shuffleDeck"
+                @reset-deck="resetDeck"
+            >
+            </card-table>
+        </div>
+
+        <script>const SESSIONID = !!new URL(window.location).searchParams.get("sessionID") ?
+    new URL(window.location).searchParams.get("sessionID") :
+    'session'+Math.floor(2000000 * Math.random())
+const USERID = 'user'+Math.floor(2000000 * Math.random())
+let WS = null;
+
+function uuidv4() {
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+      (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    );
+  }
+  
+const ws_configured_event = new Event("ws-configured");
+const ws_opened_event = new Event("ws-opened");
+
+class PubSubHandler {
+    constructor() {
+        this.ws = null
+    }
+    async setWS() {
+        let res = await fetch(`${window.location.origin}/api/negotiate?userID=${USERID}&sessionID=${SESSIONID}`)
+        let data = await res.json()
+        // console.log(data.url)
+        let ws = new WebSocket(data.url, 'json.webpubsub.azure.v1')
+        ws.onopen = (e) => {
+            document.dispatchEvent(ws_opened_event)
+    
+            console.log(e)
+            console.log('[open] Connection established')
+            
+            // ws.send(JSON.stringify({
+            //     type: 'joinGroup',
+            //     group: SESSIONID
+            // }));
+    
+        };
+    
+        ws.onclose = (event) => {
+            if (event.wasClean) {
+                console.log(`[close] Connect closed cleanly, code=${event.code} reason=${event.reason}`);
+            } else {
+                alert('[close] Connection died')
+                console.error(`[close] Connect closed with error, code=${event.code} reason=${event.reason}`)
+            }
+            document.dispatchEvent(new Event("ws-closed"))
+        }
+        
+        ws.onerror = (error) => {
+            console.log(error)
+        }
+    
+        ws.onmessage = event => {
+            // console.log("message from server:", event.data)
+            let message = JSON.parse(event.data)
+            if (message.type === "message" && message.group===SESSIONID) {
+                if (message.data.userID !== USERID) {
+                    console.log("message found", message.data)
+                    document.dispatchEvent(
+                        new CustomEvent("server-"+message.data.event, {detail: message.data})
+                    )
+                    console.log("sent event: server-"+message.data.event)
+                    
+                } else {
+                    // console.log("message found from me", message.data)
+                }
+            }
+            return false
+        };
+    
+        
+        this.ws = ws
+        console.log("set WS");
+        
+        document.dispatchEvent(ws_configured_event)
+    
+    }
+    async sendData (sessionid_, data) {
+        if (this.ws === null) {
+
+        } else {
+            this.ws.send(JSON.stringify(
+                {
+                    type: 'sendToGroup',
+                    group: sessionid_,
+                    dataType: 'json',
+                    data: data,
+                    ackId: Math.floor(2000000 * Math.random())
+                }
+            ))
+        }
+    }
+    async joinGroup(sessionid_) {
+        if (this.ws === null) {
+
+        } else {
+            this.ws.send(JSON.stringify({
+                type: 'joinGroup',
+                group: sessionid_
+            }));
+        }
+    }
+}
+
+const psh = new PubSubHandler()
+psh.setWS().catch(e =>{
+    console.error(e)
+})
+
+const app = Vue.createApp({
+    data() {
+        return {
+            sessionid_: SESSIONID,
+            userid_: USERID,
+            values: ['A',2,3,4,5,6,7,8,9,10,'J','Q','K'],
+            values_icons: [null,null,null,null,null,null,null,null,null,null,'chess-knight','chess-queen','crown'],
+            suits: ["C","S","H","D"],
+            suits_icons: ["clover","trowel","heart","diamond"],
+            cards_: {},
+            stacks_: {},
+            ws: null,
+            allowCardsGenerate: false,
+            allowCardStateReponse: false,
+            countReceivedCardStateResponses: 0,
+            connectionStatusState_: false,
+            connectionStatusMessage_: "Offline"
+        }
+    },
+    mounted() {
+        document.addEventListener('ws-opened', () => {
+            console.log("received ws-opened event")
+            this.handleChangedJoinSessionID(this.sessionid_)
+
+            psh.sendData(this.sessionid_, {
+                userID: this.userid_,
+                data: "test message after mounting"
+            })
+
+            this.connectionStatusState_ = true
+            this.connectionStatusMessage_ = "Online"
+        })
+        this.handleChangedJoinSessionID(this.sessionid_)
+    },
+    methods: {
+        getStack(location) {
+            const d = []
+            for (let k in this.cards_){
+                if (this.cards_[k].location === location) {
+                    d.push(this.cards_[k])
+                }
+            }
+            d.sort((a,b) => a.seq-b.seq)
+            this.stacks_[location] = d
+            return d
+        }, 
+        move_card(card, source, destination, sendEvent=true){
+            console.log("move_card", card, source, destination)
+            this.changeCardLocation(card.id, destination)
+
+            sendEvent ? psh.sendData(this.sessionid_, {
+                event: "card-moved",
+                sessionID: this.sessionid_,
+                card: card,
+                source: source,
+                destination: destination,
+                userID: this.userid_
+            }) : null
+        },
+        changeCardLocation(cardid, location_dst, sendEvent=true) {
+            console.log("changeCardLocation", cardid, location_dst)
+            const location_src = this.cards_[cardid].location
+            
+            this.stacks_[location_dst] = Object.entries(this.cards_)
+                .filter(kc=>kc[1].location==location_dst)
+                .map(kc=>kc[1])
+            this.stacks_[location_dst].push(this.cards_[cardid])
+            this.cards_[cardid].location = location_dst
+            this.cards_[cardid].seq = Math.max.apply(null,Object.entries(this.cards_).map(kc=>kc[1].seq))+1
+            this.stacks_[location_dst].sort((a,b) => a.seq-b.seq)
+            
+            this.stacks_[location_src] = Object.entries(this.cards_)
+                .filter(kc=>kc[1].location==location_src)
+                .map(kc=>kc[1])
+            this.stacks_[location_src].sort((a,b) => a.seq-b.seq)
+        },
+        shuffleDeck(sendEvent=true) {
+            shuffleArray(this.stacks_["deck"]).forEach(
+                (c,i) => {
+                    c.seq = i
+                }
+            )
+            console.log(this.stacks_["deck"])
+
+            const cobj = {}
+            Object.entries(this.cards_).forEach((kc => {
+                cobj[kc[0]]=kc[1]
+            }))
+            sendEvent ? psh.sendData(this.sessionid_, {
+                event: "deck-shuffled",
+                sessionID: this.sessionid_,
+                userID: this.userid_,
+                cards: cobj
+            }) : null
+        },
+        resetDeck() {
+            const cards_ = []
+            let count = 0
+            this.suits.forEach((s, sidx) => {
+                this.values.forEach((v, vidx) => {
+                    const c = {
+                        id: ''+v+s,
+                        suit: s,
+                        suit_icon: this.suits_icons[sidx],
+                        value: v,
+                        value_icon: this.values_icons[vidx],
+                        shown: false,
+                        location: "deck",
+                        seq: count
+                    }
+                    count += 1
+                    cards_[c.id] = c
+                }) 
+            });
+            this.cards_=cards_
+            this.getAllStacks()
+
+            const cobj = {}
+            Object.entries(this.cards_).forEach((kc => {
+                cobj[kc[0]]=kc[1]
+            }))
+            psh.sendData(this.sessionid_, {
+                event: "deck-initialized",
+                sessionID: this.sessionid_,
+                userID: this.userid_,
+                cards: cobj
+            })
+        },
+        handeCardShownChanged(card) {
+            console.log('card-shown-changed', card)
+            psh.sendData(this.sessionid_, {
+                event: "card-shown-changed",
+                sessionID: this.sessionid_,
+                card: card,
+                userID: this.userid_
+            })
+        },
+        getAllStacks() {
+            const locations = []
+            for (let k in this.cards_) {
+                if (!locations.includes(this.cards_[k].location)) {
+                    locations.push(this.cards_[k].location)
+                }
+            }
+            locations.forEach(location => {
+                this.getStack(location)
+            })
+        },
+        handleChangedJoinSessionID(joinSessionID_) {
+            if (this.sessionid_ !== joinSessionID_) {
+                window.location.href=`${window.location.origin}/api/index?sessionID=`+joinSessionID_+"&code="+new URL(window.location).searchParams.get("code")
+                return
+            }
+
+            this.sessionid_ = joinSessionID_;
+            
+            psh.joinGroup(this.sessionid_)
+            
+            document.addEventListener("server-deck-state", e => {
+                const data = e.detail
+                if (data.userID!==this.userid_) {
+                    console.log("received server-deck-state event from other user")
+                }
+            })
+            document.addEventListener("server-deck-initialized", e => {
+                const data = e.detail
+                if (data.userID!==this.userid_) {
+                    console.log("received server-deck-initialized event from other user", data)
+                    // reflect cards from socket to ui
+                    for (let cardid in data.cards) {
+                        this.cards_[cardid] = data.cards[cardid]
+                    }
+                    this.getAllStacks()
+                }
+            })
+            document.addEventListener("server-deck-shuffled", e => {
+                const data = e.detail
+                if (data.userID!==this.userid_) {
+                    console.log("received server-deck-shuffled event from other user")
+                    // reflect cards from socket to ui
+                    console.log(data.cards)
+                    for (let cardid in data.cards) {
+                        this.cards_[cardid] = data.cards[cardid]
+                    }
+                    this.getAllStacks()
+                }
+            })
+            document.addEventListener("server-card-shown-changed", e => {
+                const data = e.detail
+                if (data.userID!==this.userid_) {
+                    console.log("received server-card-shown-changed event from other user")
+                    this.cards_[data.card.id].shown = data.card.shown
+                }
+            })
+            document.addEventListener("server-card-moved", e => {
+                const data = e.detail
+                if (data.userID!==this.userid_) {
+                    console.log("received server-card-moved event from other user")
+                    this.move_card(data.card, data.source, data.destination, sendEvent=false)
+                }
+            })
+            document.addEventListener("server-cards-state-request", e => {
+                const data = e.detail
+                if (data.userID!==this.userid_) {
+                    console.log("received server-cards-state-request event from other user")
+                    const cobj = {}
+                    Object.entries(this.cards_).forEach((kc => {
+                        cobj[kc[0]]=kc[1]
+                    }))
+                    psh.sendData(this.sessionid_, {
+                        event: "cards-state-response",
+                        sessionID: this.sessionid_,
+                        userID: this.userid_,
+                        cards: cobj
+                    })
+                }
+            })
+            document.addEventListener("ws-closed", () => {
+                this.connectionStatusState_ = false
+                this.connectionStatusMessage_ = "Connection closed"
+            })
+
+            this.allowCardsGenerate = false
+            this.allowCardStateReponse = true
+            console.log(`setting this.allowCardStateReponse to ${this.allowCardStateReponse}`)
+            this.countReceivedCardStateResponses = 0
+            setTimeout(() => {
+                this.allowCardStateReponse = false
+                if (this.countReceivedCardStateResponses === 0) {
+                    this.allowCardsGenerate = true
+                }
+                console.log(`setting this.allowCardStateReponse to ${this.allowCardStateReponse}`)
+            }, 5000)
+            psh.sendData(this.sessionid_, {
+                event: "cards-state-request",
+                sessionID: this.sessionid_,
+                userID: this.userid_,
+            })
+
+            document.addEventListener("server-cards-state-response", e => {
+                if (!this.allowCardStateReponse) {
+                    console.log(`ignoring server-cards-state-response event from other user after timeout`)
+                    return
+                }
+                const data = e.detail
+                if (data.userID!==this.userid_) {
+                    console.log("received server-cards-state-response event from other user")
+                    // reflect cards from socket to ui
+                    if (this.countReceivedCardStateResponses > 3) {
+                        console.log(`ignoring server-cards-state-response event from other user after more than allowed responses`)
+                        return
+                    }
+                    console.log(data.cards)
+                    for (let cardid in data.cards) {
+                        this.cards_[cardid] = data.cards[cardid]
+                    }
+                    this.getAllStacks()
+                    this.countReceivedCardStateResponses += 1
+                }
+            })
+        },
+    },
+    computed: {
+        cards() {
+            if (this.allowCardsGenerate) {
+                if (Object.entries(this.cards_).length == 0) {
+                    this.resetDeck()
+                }
+            }
+            return this.cards_
+        },
+        deck() {
+            return "deck" in this.stacks_ ? this.stacks_["deck"] : []
+        },
+        table() {
+            return "table" in this.stacks_ ? this.stacks_["table"] : []
+        },
+        hand() {
+            return "hand" in this.stacks_ ?  this.stacks_["hand"] : []
+        }
+    }
+})
+
+
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}</script>
+        <script>app.component('card-table', {
+    props: {
+        sessionid: {},
+        deck: {},
+        table: {},
+        userid: {},
+        connectionstatusstate: {},
+        connectionstatusmessage: {}
+    },
+    template:
+    `
+    <div class="card-session">
+        <div class="table">
+            <div class="row">
+                <div class="col-10">
+                    <h1>
+                        Session
+                        <button @click="showSessionIDInput" v-if="!showJoinSessionID">{{sessionid}}</button>
+                        <input type="text" v-model="newSessionID" v-if="showJoinSessionID" @change="handleChangedJoinSessionID" @blur="hideSessionIDInput">
+                    </h1>
+                </div>
+                <div class="col-2">
+                    <span :class="connectionstatusstate ? 'text-success' : 'text-warning'">{{connectionstatusmessage}}</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-2">
+                    <h1>
+                        Deck ({{deck.length}})
+                        <button @click="shuffleDeck">Shuffle Deck</button>
+                        <button @click="resetDeck">Reset Deck</button>
+                    </h1>
+                    <div v-if="deck.length > 0">
+                        <card-card
+                            v-for="(card, cardIndex) in [deck[deck.length-1]]"
+                            :key="card.id"
+                            :card="card"
+                            :cardlocation="'deck'"
+                            :cardshown="card.shown"
+                            @move-card="move_card"
+                            @card-shown-changed="cardShownChanged"
+                        ></card-card>
+                    </div>
+                </div>
+                <div class="col-10">
+                    <h1>Table ({{table.length}})</h1>
+                    <div v-if="table.length > 0">
+                        <card-card
+                            v-for="(card, cardIndex) in table"
+                            :key="card.id"
+                            :card="card"
+                            :cardlocation="'table'"
+                            :cardshown="card.shown"
+                            @move-card="move_card"
+                            @card-shown-changed="cardShownChanged"
+                        ></card-card>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    `,
+    data() {
+        return {
+            showJoinSessionID: false,
+            newSessionID: null,
+        }
+    },
+    methods: {
+        showSessionIDInput() {
+            this.newSessionID = this.sessionid
+            this.showJoinSessionID = true
+            console.log("showSessionIDInput", this.showJoinSessionID)
+        },
+        hideSessionIDInput() {
+            this.showJoinSessionID = false
+            console.log("hideSessionIDInput", this.showJoinSessionID)
+        },
+        handleChangedJoinSessionID() {
+            console.log("changed-session-id", this.newSessionID)
+            this.$emit("changed-session-id", this.newSessionID)
+            this.showJoinSessionID = false
+        },
+        cardShownChanged(card, sendEvent=true){
+            sendEvent ? this.$emit('card-shown-changed', card) : null
+        },
+        move_card(card, source, destination, sendEvent=true){
+            sendEvent ? this.$emit('move-card', card, source, destination) : null
+        },
+        shuffleDeck() {
+            this.$emit('shuffle-deck')
+        },
+        resetDeck() {
+            this.$emit('reset-deck')
+        }
+    }
+})
+</script>
+        <script>function flipCard(e) {
+    e.getElementsByClassName('card')[0].classList.toggle('flipped')
+}
+
+app.component('card-card', {
+    props: {
+        card: {},
+        cardlocation: {},
+        cardshown: {}
+    },
+    template: 
+    `
+    <div class="card-container-container">
+        <div class="card-container" @click="toggleCardShown">
+            <div class="card" :class="{ flipped: cardshown }" >
+                <div class="front"></div>
+                <div class="back">
+                    <h1 :class="card.suit=='H' || card.suit=='D' ? 'text-danger' : 'text-dark'">
+                        <i v-if="!!card.value_icon" class="fa-solid" :class="'fa-'+card.value_icon"></i>
+                        <span v-else>
+                            {{card.value}}
+                        </span>
+                        <i v-if="!!card.suit_icon" class="fa-solid" :class="'fa-'+card.suit_icon"></i>
+                    </h1>
+                </div>
+            </div>
+        </div>
+        <button @click="dealToLocation('table')" v-if="cardlocation!=='table'">Set on table</button>
+        <button @click="dealToLocation('deck')" v-if="cardlocation!=='deck'">Return to deck</button>
+    </div>
+    `,
+    methods: {
+        toggleCardShown() {
+            this.card.shown = !this.card.shown
+            this.$emit('card-shown-changed', this.card)
+        },
+        dealToLocation(location) {
+            this.$emit('move-card', this.card, this.cardlocation, location)
+        }
+    },
+})
+</script>
+        
+
+        <!-- Mount App -->
+        <script>
+            const mountedApp = app.mount('#app')
+            
+        </script>
+    </body>
+</html>

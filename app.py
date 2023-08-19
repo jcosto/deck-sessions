@@ -5,15 +5,11 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = token_hex(32)
 socketio = SocketIO(app)
 
-@app.route("/"+token_hex(32))
-def home():
-    return render_template('index.html')
-
 @app.route("/")
-def home2():
-    return render_template('index2.html')
+def home():
+    return render_template('index-socketio.html')
 
-@socketio.on('my event')
+@socketio.on('loginevent')
 def handle_my_custom_event(json):
     print('received json: ' + str(json))
 
@@ -42,18 +38,21 @@ def handle_deck_shuffled(json):
     emit('server-deck-shuffled', json, to=room)
 
 @socketio.on('card-shown-changed')
-def handle_deck_shuffled(json):
+def handle_card_shown_changed(json):
     print('card-shown-changed received json: ' + str(json))
 
     room = json["sessionID"]
     emit('server-card-shown-changed', json, to=room)
 
 @socketio.on('card-moved')
-def handle_deck_shuffled(json):
+def handle_card_moved(json):
     print('card-moved received json: ' + str(json))
 
     room = json["sessionID"]
     emit('server-card-moved', json, to=room)
 
-if __name__ == '__main__':
+def run():
     socketio.run(app)
+
+if __name__ == '__main__':
+    run()
