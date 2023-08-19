@@ -27,8 +27,12 @@ app.component('card-table', {
                 <div class="col-2">
                     <h1>
                         Deck ({{deck.length}})
-                        <button @click="shuffleDeck">Shuffle Deck</button>
-                        <button @click="resetDeck">Reset Deck</button>
+                        <a @click="shuffleDeck" class="button button-primary m-2">
+                            <i class="fa-solid fa-shuffle"></i>
+                        </a>
+                        <a @click="resetDeck" class="button button-primary m-2">
+                            <i class="fa-solid fa-rotate"></i>
+                        </a>
                     </h1>
                     <div v-if="deck.length > 0">
                         <card-card
