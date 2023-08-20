@@ -43,6 +43,7 @@ app.component('card-table', {
                             :cardshown="card.shown"
                             @move-card="move_card"
                             @card-shown-changed="cardShownChanged"
+                            style="z-index: 10;"
                         ></card-card>
                     </div>
                 </div>
