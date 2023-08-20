@@ -10,6 +10,26 @@ app.component('card-table', {
     template:
     `
     <div class="card-session">
+        <div class="card-table">
+            <div class="table">
+                <div class="row">
+                    <div class="col-10">
+                        <div v-if="table.length > 0">
+                            <card-card
+                                v-for="(card, cardIndex) in table"
+                                :key="card.id"
+                                :card="card"
+                                :cardlocation="'table'"
+                                :cardshown="card.shown"
+                                @move-card="move_card"
+                                @card-shown-changed="cardShownChanged"
+                            ></card-card>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div class="table">
             <div class="row">
                 <div class="col-10">

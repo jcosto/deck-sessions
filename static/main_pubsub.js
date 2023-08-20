@@ -8,11 +8,8 @@ function uuidv4() {
     return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
       (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
-  }
+}
   
-const ws_configured_event = new Event("ws-configured");
-const ws_opened_event = new Event("ws-opened");
-
 class PubSubHandler {
     constructor() {
         this.ws = null
@@ -23,16 +20,10 @@ class PubSubHandler {
         // console.log(data.url)
         let ws = new WebSocket(data.url, 'json.webpubsub.azure.v1')
         ws.onopen = (e) => {
-            document.dispatchEvent(ws_opened_event)
+            document.dispatchEvent(new Event("ws-opened"))
     
-            console.log(e)
+            // console.log(e)
             console.log('[open] Connection established')
-            
-            // ws.send(JSON.stringify({
-            //     type: 'joinGroup',
-            //     group: SESSIONID
-            // }));
-    
         };
     
         ws.onclose = (event) => {
@@ -71,7 +62,7 @@ class PubSubHandler {
         this.ws = ws
         console.log("set WS");
         
-        document.dispatchEvent(ws_configured_event)
+        document.dispatchEvent(new Event("ws-configured"))
     
     }
     async sendData (sessionid_, data) {
@@ -139,7 +130,7 @@ const app = Vue.createApp({
             this.connectionStatusState_ = true
             this.connectionStatusMessage_ = "Online"
         })
-        this.handleChangedJoinSessionID(this.sessionid_)
+        // this.handleChangedJoinSessionID(this.sessionid_)
     },
     methods: {
         getStack(location) {
@@ -235,7 +226,7 @@ const app = Vue.createApp({
                 cards: cobj
             })
         },
-        handeCardShownChanged(card) {
+        handleCardShownChanged(card) {
             console.log('card-shown-changed', card)
             psh.sendData(this.sessionid_, {
                 event: "card-shown-changed",
@@ -336,7 +327,7 @@ const app = Vue.createApp({
                 this.allowCardStateReponse = false
                 if (this.countReceivedCardStateResponses === 0) {
                     this.allowCardsGenerate = true
-                    document.dispatchEvent(new Event("show-welcome-modal-ready"))
+                    this.cards // run cards first time
                 }
                 console.log(`setting this.allowCardStateReponse to ${this.allowCardStateReponse}`)
             }, 5000)
@@ -373,8 +364,10 @@ const app = Vue.createApp({
     computed: {
         cards() {
             if (this.allowCardsGenerate) {
+                console.log('allowCardsGenerate')
                 if (Object.entries(this.cards_).length == 0) {
                     this.resetDeck()
+                    document.dispatchEvent(new Event("show-welcome-modal-ready"))
                 }
             }
             return this.cards_
