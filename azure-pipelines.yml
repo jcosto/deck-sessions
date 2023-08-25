@@ -12,9 +12,19 @@ pool:
 steps:
 
 - script: |
-    python3 -m pip install virtualenv
-    python3 -m virtualenv env
+    py -3 -m pip install virtualenv
+    py -3 -m virtualenv env
     .\env\script\activate
     python build_index_html.py
-    cat index.thml
-  displayName: 'Run a multi-line script'
+  displayName: 'build index.html'
+
+- script: |
+    cat index.html
+    copy index.html $(Build.ArtifactStagingDirectory)\index.html
+  displayName: 'view built file'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
