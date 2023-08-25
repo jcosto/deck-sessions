@@ -16,7 +16,7 @@ steps:
   displayName: 'build index.html'
 
 - script: |
-    cat index.html
+    type index.html
     copy index.html $(Build.ArtifactStagingDirectory)\index.html
   displayName: 'view built file'
 
