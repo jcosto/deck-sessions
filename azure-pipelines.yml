@@ -12,10 +12,7 @@ pool:
 steps:
 
 - script: |
-    py -3 -m pip install virtualenv
-    py -3 -m virtualenv env
-    .\env\script\activate
-    python build_index_html.py
+    py -3 build_index_html.py
   displayName: 'build index.html'
 
 - script: |
