@@ -59,3 +59,9 @@
 .card.flipped {
   transform: rotateY(180deg);
 }
+
+div.sticky-bottom {
+  position: -webkit-sticky; /* Safari */
+  position: sticky;
+  top: 0;
+}
