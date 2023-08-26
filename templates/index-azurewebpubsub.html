@@ -13,6 +13,8 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" integrity="sha512-fD9DI5bZwQxOi7MhYWnnNPlvXdp/2Pj3XSTRrFs5FQa4mizyGLnJcN6tuvUS6LbmgN1ut+XGSABKvjN0H6Aoow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+        <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" integrity="sha256-tG5mcZUtJsZvyKAxYLVXrmjKBVLd6VpVccqz/r4ypFE=" crossorigin="anonymous"></script>
+
         <link rel="stylesheet" href="{{url_for('static', filename='assets/card.css')}}" />
         <style>
             body {
@@ -23,32 +25,120 @@
         </style>
     </head>
     <body>
+        <div class="modal fade" id="welcomeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="welcomeModalLabel" aria-hidden="false">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header d-flex justify-content-center">
+                        <h5 class="modal-title" id="welcomeModalLabel">
+                            <i class="fa-solid fa-trowel" style="color:black;"></i>
+
+                            <strong class="m-2">Deck Sesh</strong>
+
+                            <i class="fa-solid fa-diamond" style="color:red;"></i>
+                        </h5>
+                    </div>
+                    <div class="modal-body">
+                        <div id="welcomeModalLoading">
+                            <table  class="d-flex justify-content-center">
+                                <tr>
+                                    <td>
+                                        <div class="spinner-border text-primary" role="status" style>
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle">
+                                        <span class="m-2">Loading session...</span>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                        </div>
+                        <div id="welcomeModalReady" class="text-center">
+                            <div class="m-2">
+                                Your session is ready!
+                            </div>
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Proceed to session</button>
+                        </div>
+                        
+                    </div>
+                    <div class="modal-footer d-flex justify-content-center">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("show-welcome-modal-loading", () => {
+                $('#welcomeModal').modal('show')
+                $('#welcomeModalLoading').show()
+                $('#welcomeModalReady').hide()
+            })
+            document.addEventListener("show-welcome-modal-ready", () => {
+                $('#welcomeModalLoading').hide()
+                $('#welcomeModalReady').show()
+            })
+        </script>
+
+        <script src="{{url_for('static', filename='main_pubsub.js')}}"></script>
+        <script src="{{url_for('static', filename='components/card_session_pubsub.js')}}"></script>
+        <script src="{{url_for('static', filename='components/card_deck_pubsub.js')}}"></script>
+        <script src="{{url_for('static', filename='components/card_table_pubsub.js')}}"></script>
+        <script src="{{url_for('static', filename='components/card_pubsub.js')}}"></script>
+
         <div id="app">
-            <card-table
+            <card-session
                 :sessionid = "sessionid_"
-                :deck="deck"
-                :table="table"
-                :cards="cards"
                 :connectionstatusstate="connectionStatusState_"
                 :connectionstatusmessage="connectionStatusMessage_"
-                @move-card="move_card"
                 @changed-session-id="handleChangedJoinSessionID"
-                @card-shown-changed="handeCardShownChanged"
+            >
+            </card-session>
+            <card-deck
+                :deck="deck"
+                @move-card="move_card"
+                @card-shown-changed="handleCardShownChanged"
                 @shuffle-deck="shuffleDeck"
                 @reset-deck="resetDeck"
             >
+            </card-deck>
+            <card-table
+                :table="table"
+                @move-card="move_card"
+                @card-shown-changed="handleCardShownChanged"
+            >
             </card-table>
         </div>
-
-        <script src="{{url_for('static', filename='main_pubsub.js')}}"></script>
-        <script src="{{url_for('static', filename='components/deck_pubsub.js')}}"></script>
-        <script src="{{url_for('static', filename='components/card_pubsub.js')}}"></script>
         
 
         <!-- Mount App -->
         <script>
             const mountedApp = app.mount('#app')
-            
+
+            $(document).ready(function() { 
+                document.dispatchEvent(new Event("show-welcome-modal-loading"))
+            })
+
+            // bootstrap script to enable popovers, required!!
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+            var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                return new bootstrap.Popover(popoverTriggerEl)
+            })
+
+            let deckActionsCollapse = null
+            document.addEventListener('click', () => {
+                const box = document.getElementById('collapseDeckActions');
+
+                if (deckActionsCollapse === null) {
+                    deckActionsCollapse = new bootstrap.Collapse(
+                        document.getElementById('collapseDeckActions'), {
+                        toggle: false
+                    })
+                }
+
+                if (!box.contains(event.target)) {
+                    deckActionsCollapse.hide()
+                }
+            })
         </script>
     </body>
 </html>

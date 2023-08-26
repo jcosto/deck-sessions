@@ -10,6 +10,26 @@ app.component('card-table', {
     template:
     `
     <div class="card-session">
+        <div class="card-table">
+            <div class="table">
+                <div class="row">
+                    <div class="col-10">
+                        <div v-if="table.length > 0">
+                            <card-card
+                                v-for="(card, cardIndex) in table"
+                                :key="card.id"
+                                :card="card"
+                                :cardlocation="'table'"
+                                :cardshown="card.shown"
+                                @move-card="move_card"
+                                @card-shown-changed="cardShownChanged"
+                            ></card-card>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div class="table">
             <div class="row">
                 <div class="col-10">
@@ -27,8 +47,12 @@ app.component('card-table', {
                 <div class="col-2">
                     <h1>
                         Deck ({{deck.length}})
-                        <button @click="shuffleDeck">Shuffle Deck</button>
-                        <button @click="resetDeck">Reset Deck</button>
+                        <a @click="shuffleDeck" class="button button-primary m-2">
+                            <i class="fa-solid fa-shuffle"></i>
+                        </a>
+                        <a @click="resetDeck" class="button button-primary m-2">
+                            <i class="fa-solid fa-rotate"></i>
+                        </a>
                     </h1>
                     <div v-if="deck.length > 0">
                         <card-card
@@ -39,6 +63,7 @@ app.component('card-table', {
                             :cardshown="card.shown"
                             @move-card="move_card"
                             @card-shown-changed="cardShownChanged"
+                            style="z-index: 10;"
                         ></card-card>
                     </div>
                 </div>

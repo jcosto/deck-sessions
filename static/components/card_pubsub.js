@@ -10,7 +10,7 @@ app.component('card-card', {
     },
     template: 
     `
-    <div class="card-container-container">
+    <div class="card-container-container" style="position:relative;">
         <div class="card-container" @click="toggleCardShown">
             <div class="card" :class="{ flipped: cardshown }" >
                 <div class="front"></div>
@@ -25,8 +25,18 @@ app.component('card-card', {
                 </div>
             </div>
         </div>
-        <button @click="dealToLocation('table')" v-if="cardlocation!=='table'">Set on table</button>
-        <button @click="dealToLocation('deck')" v-if="cardlocation!=='deck'">Return to deck</button>
+        <button
+            class="btn btn-primary" style="position:absolute;bottom:0px;left:0px;"
+            @click="dealToLocation('table')" v-if="cardlocation!=='table'"
+            >
+            <i class="fa-solid fa-angle-down"></i>
+        </button>
+        <button
+            class="btn btn-primary" style="position:absolute;top:0px;right:0px;"
+            @click="dealToLocation('deck')" v-if="cardlocation!=='deck'"
+            >
+            <i class="fa-solid fa-angle-up"></i>
+        </button>
     </div>
     `,
     methods: {
