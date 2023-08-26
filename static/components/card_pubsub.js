@@ -26,13 +26,13 @@ app.component('card-card', {
             </div>
         </div>
         <button
-            class="btn btn-primary" style="position:absolute;bottom:0px;right:0px;"
+            class="btn btn-primary" style="position:absolute;bottom:0px;left:0px;"
             @click="dealToLocation('table')" v-if="cardlocation!=='table'"
             >
             <i class="fa-solid fa-angle-down"></i>
         </button>
         <button
-            class="btn btn-primary" style="position:absolute;bottom:0px;right:0px;"
+            class="btn btn-primary" style="position:absolute;top:0px;right:0px;"
             @click="dealToLocation('deck')" v-if="cardlocation!=='deck'"
             >
             <i class="fa-solid fa-angle-up"></i>
