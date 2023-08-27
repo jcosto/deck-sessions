@@ -26,6 +26,21 @@ with open(card_js_path, "r") as fin:
         """<script src="{{url_for('static', filename='components/card_pubsub.js')}}"></script>""",
         "<script>"+fin.read()+"</script>"
     )
+with open(card_js_path, "r") as fin:
+    index_html = index_html.replace(
+        """<script src="{{url_for('static', filename='components/card_deck_pubsub.js')}}"></script>""",
+        "<script>"+fin.read()+"</script>"
+    )
+with open(card_js_path, "r") as fin:
+    index_html = index_html.replace(
+        """<script src="{{url_for('static', filename='components/card_table_pubsub.js')}}"></script>""",
+        "<script>"+fin.read()+"</script>"
+    )
+with open(card_js_path, "r") as fin:
+    index_html = index_html.replace(
+        """<script src="{{url_for('static', filename='components/card_session_pubsub.js')}}"></script>""",
+        "<script>"+fin.read()+"</script>"
+    )
 
 with open("index.html", "w") as fout:
     fout.write(index_html)
