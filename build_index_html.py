@@ -14,23 +14,23 @@ file_replace_items = [
         "dst_text": "<script>{file_content}</script>"
     },
     {
-        "src_path": r"static\card_pubsub.js",
-        "src_target": """<script src="{{url_for('static', filename='card_pubsub.js')}}"></script>""",
+        "src_path": r"static\components\card_pubsub.js",
+        "src_target": """<script src="{{url_for('static', filename='components/card_pubsub.js')}}"></script>""",
         "dst_text": "<script>{file_content}</script>"
     },
     {
-        "src_path": r"static\card_deck_pubsub.js",
-        "src_target": """<script src="{{url_for('static', filename='card_deck_pubsub.js')}}"></script>""",
+        "src_path": r"static\components\card_deck_pubsub.js",
+        "src_target": """<script src="{{url_for('static', filename='components/card_deck_pubsub.js')}}"></script>""",
         "dst_text": "<script>{file_content}</script>"
     },
     {
-        "src_path": r"static\card_table_pubsub.js",
-        "src_target": """<script src="{{url_for('static', filename='card_table_pubsub.js')}}"></script>""",
+        "src_path": r"static\components\card_table_pubsub.js",
+        "src_target": """<script src="{{url_for('static', filename='components/card_table_pubsub.js')}}"></script>""",
         "dst_text": "<script>{file_content}</script>"
     },
     {
-        "src_path": r"static\card_session_pubsub.js",
-        "src_target": """<script src="{{url_for('static', filename='card_session_pubsub.js')}}"></script>""",
+        "src_path": r"static\components\card_session_pubsub.js",
+        "src_target": """<script src="{{url_for('static', filename='components/card_session_pubsub.js')}}"></script>""",
         "dst_text": "<script>{file_content}</script>"
     },
 ]
